@@ -17,7 +17,7 @@ public class TokenCookieService {
         return ResponseCookie.from("access_token", "delete")
                 .httpOnly(props.isHttpOnly())
                 .secure(props.isSecure())
-                .path("/")
+                .path(props.getPath())
                 .maxAge(0)
                 .sameSite(props.getSameSite())
                 .build();
@@ -28,7 +28,7 @@ public class TokenCookieService {
         return ResponseCookie.from("refresh_token", "delete")
                 .httpOnly(props.isHttpOnly())
                 .secure(props.isSecure())
-                .path("/")
+                .path(props.getPath())
                 .maxAge(0)
                 .sameSite(props.getSameSite())
                 .build();
@@ -39,7 +39,7 @@ public class TokenCookieService {
         return ResponseCookie.from("access_token", token)
                 .httpOnly(props.isHttpOnly())
                 .secure(props.isSecure())
-                .path("/")
+                .path(props.getPath())
                 .maxAge(props.getMaxAgeSeconds())
                 .sameSite(props.getSameSite())
                 .build();
@@ -50,7 +50,7 @@ public class TokenCookieService {
         return ResponseCookie.from("refresh_token", token)
                 .httpOnly(props.isHttpOnly())
                 .secure(props.isSecure())
-                .path("/")
+                .path(props.getPath())
                 .maxAge(props.getMaxAgeSeconds())
                 .sameSite(props.getSameSite())
                 .build();

@@ -21,6 +21,7 @@ public class CookieProperties {
         private boolean secure;
         private String sameSite;
         private long maxAgeSeconds;
+        private String path;
     }
 
 

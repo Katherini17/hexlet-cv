@@ -22,8 +22,10 @@ app:
         secure: false
         sameSite: Lax
         maxAgeSeconds: 900       # 15 минут
+        path: /api
       refresh:
         httpOnly: true
         secure: false
         sameSite: Lax
         maxAgeSeconds: 2592000   # 30 дней
+        path: /api/auth/refresh
