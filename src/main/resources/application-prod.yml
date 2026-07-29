@@ -8,3 +8,24 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
+
+app:
+  security:
+    cookie:
+      access:
+        httpOnly: true
+        secure: true
+        sameSite: Strict
+        path: /api
+        maxAgeSeconds: 900
+      refresh:
+        httpOnly: true
+        secure: true
+        sameSite: Lax
+        path: /api/auth/refresh
+        maxAgeSeconds: 2592000
+    jwt:
+      access-token-validity-seconds: 900
+      refresh-token-validity-seconds: 2592000
+      issuer: hexlet-cv
+      audience: hexlet-cv-frontend
