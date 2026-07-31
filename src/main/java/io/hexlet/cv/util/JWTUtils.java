@@ -1,12 +1,12 @@
 package io.hexlet.cv.util;
 
-
 import io.hexlet.cv.config.JwtProperties;
 import io.hexlet.cv.repository.UserRepository;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -20,40 +20,46 @@ public class JWTUtils {
 
     private final JwtEncoder encoder;
     private final JwtProperties jwtProperties;
-    private final JwtDecoder decoder;
+    private final JwtDecoder jwtDecoder;                                    // access-only, бин без квалификатора
+    @Qualifier("refreshTokenDecoder")
+    private final JwtDecoder refreshTokenDecoder;                          // только для refresh-флоу
     private final UserRepository userRepository;
 
-
     public String generateAccessToken(String username) {
-
         var user = userRepository.findByEmail(username).orElseThrow();
-        var role = user.getRole().name();
-
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("self")
+                .issuer(jwtProperties.getIssuer())
+                .audience(List.of(jwtProperties.getAudience()))
                 .issuedAt(now)
                 .expiresAt(now.plus(jwtProperties.getAccessTokenValiditySeconds(), ChronoUnit.SECONDS))
                 .subject(username)
-                .claim("roles", List.of(role))
+                .claim("roles", List.of(user.getRole().name()))
+                .claim("tokenVersion", user.getTokenVersion())
                 .build();
-        return this.encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        return encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
     public String generateRefreshToken(String username) {
+        var user = userRepository.findByEmail(username).orElseThrow();
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("self")
+                .issuer(jwtProperties.getIssuer())
+                .audience(List.of(jwtProperties.getAudience()))
                 .issuedAt(now)
                 .expiresAt(now.plus(jwtProperties.getRefreshTokenValiditySeconds(), ChronoUnit.SECONDS))
                 .subject(username)
                 .claim("type", "refresh")
+                .claim("tokenVersion", user.getTokenVersion())
                 .build();
-        return this.encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        return encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-
     public Jwt decode(String token) {
-        return decoder.decode(token);
+        return jwtDecoder.decode(token);
+    }
+
+    public Jwt decodeRefresh(String token) {
+        return refreshTokenDecoder.decode(token);
     }
 }

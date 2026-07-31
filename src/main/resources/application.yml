@@ -54,3 +54,5 @@ app:
     jwt:
       access-token-validity-seconds: 900        # 15 минут
       refresh-token-validity-seconds: 2592000   # 30 дней
+      issuer: hexlet-cv
+      audience: hexlet-cv-frontend

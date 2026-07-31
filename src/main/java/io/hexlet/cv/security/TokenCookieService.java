@@ -63,6 +63,10 @@ public class TokenCookieService {
         );
     }
 
+    public Cookies buildExpiredCookies() {
+        return new Cookies(buildExpiredAccessCookie(), buildExpiredRefreshCookie());
+    }
+
     public record Cookies(ResponseCookie access, ResponseCookie refresh) {
 
     }

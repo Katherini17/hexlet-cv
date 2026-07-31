@@ -16,13 +16,13 @@ app:
         httpOnly: true
         secure: true
         sameSite: Strict
-        path: /api
+        path: /
         maxAgeSeconds: 900
       refresh:
         httpOnly: true
         secure: true
         sameSite: Lax
-        path: /api/auth/refresh
+        path: /
         maxAgeSeconds: 2592000
     jwt:
       access-token-validity-seconds: 900

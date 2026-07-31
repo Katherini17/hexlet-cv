@@ -1,10 +1,15 @@
 package io.hexlet.cv.security;
 
+import io.hexlet.cv.repository.UserRepository;
 import io.hexlet.cv.util.JWTUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -12,25 +17,40 @@ public class TokenService {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtils jwtUtils;
+    private final UserRepository userRepository;
 
     public Tokens authenticateAndGenerate(String email, String password) {
-        var authentication = new UsernamePasswordAuthenticationToken(email, password);
-        // authenticationManager.authenticate(authentication);
-        
-        var result = authenticationManager.authenticate(authentication);
-        /*
-        var roles = result.getAuthorities().stream()
-                .map(a -> a.getAuthority())
-                .toList();
-        */
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        return new Tokens(
+                jwtUtils.generateAccessToken(email),
+                jwtUtils.generateRefreshToken(email)
+        );
+    }
 
-        var accessToken = jwtUtils.generateAccessToken(email);
-        var refreshToken = jwtUtils.generateRefreshToken(email);
+    public Tokens refresh(String refreshToken) {
+        Jwt jwt;
+        try {
+            jwt = jwtUtils.decodeRefresh(refreshToken);
+        } catch (JwtException e) {
+            throw new BadCredentialsException("Invalid refresh token", e);
+        }
+        String email = jwt.getSubject();
+        return new Tokens(
+                jwtUtils.generateAccessToken(email),
+                jwtUtils.generateRefreshToken(email)
+        );
+    }
 
-        return new Tokens(accessToken, refreshToken);
+    @Transactional
+    public void revokeByRefreshToken(String refreshToken) {
+        try {
+            Jwt jwt = jwtUtils.decodeRefresh(refreshToken);
+            userRepository.incrementTokenVersion(jwt.getSubject());
+        } catch (JwtException ignored) {
+            // токен уже истёк/невалиден/повторный logout — отзывать нечего, это не ошибка
+        }
     }
 
     public record Tokens(String access, String refresh) {
-
     }
 }
