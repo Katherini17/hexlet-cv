@@ -15,12 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class StoriesStoryService {
 
     private final StoriesStoryRepository storiesStoryRepository;
     private final StoriesStoryMapper storiesStoryMapper;
 
+    @Transactional(readOnly = true)
     public StoriesStoryPageResponse getPublicStories(Pageable pageable) {
         Page<StoriesStory> storiesPage = storiesStoryRepository.findByIsPublishedTrue(pageable);
 
