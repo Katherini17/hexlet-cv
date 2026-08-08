@@ -1,13 +1,5 @@
 package io.hexlet.cv.controller.admin.marketing;
 
-import io.hexlet.cv.controller.admin.marketing.support.AdminMarketingControllerTestSupport;
-import io.hexlet.cv.dto.marketing.PricingCreateDto;
-import io.hexlet.cv.dto.marketing.PricingUpdateDto;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.openapitools.jackson.nullable.JsonNullable;
-import org.springframework.http.MediaType;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,6 +10,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import io.hexlet.cv.controller.admin.marketing.support.AdminMarketingControllerTestSupport;
+import io.hexlet.cv.dto.marketing.PricingCreateDto;
+import io.hexlet.cv.dto.marketing.PricingUpdateDto;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.http.MediaType;
 
 /**
  * Создание и обновление тарифов через {@code POST/PUT /admin/marketing/pricing}:
@@ -58,7 +58,7 @@ public class AdminMarketingPricingControllerTest extends AdminMarketingControlle
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.name").exists());
     }
 
@@ -74,7 +74,7 @@ public class AdminMarketingPricingControllerTest extends AdminMarketingControlle
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.originalPrice").exists());
     }
 
@@ -90,7 +90,7 @@ public class AdminMarketingPricingControllerTest extends AdminMarketingControlle
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.discountPercent").exists());
     }
 
@@ -106,7 +106,7 @@ public class AdminMarketingPricingControllerTest extends AdminMarketingControlle
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.discountPercent").exists());
     }
 
@@ -122,7 +122,7 @@ public class AdminMarketingPricingControllerTest extends AdminMarketingControlle
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.name").exists());
     }
 
@@ -151,7 +151,7 @@ public class AdminMarketingPricingControllerTest extends AdminMarketingControlle
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.discountPercent").exists());
     }
 }

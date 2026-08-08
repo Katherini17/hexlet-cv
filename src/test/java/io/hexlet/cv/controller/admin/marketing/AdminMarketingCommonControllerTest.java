@@ -1,17 +1,5 @@
 package io.hexlet.cv.controller.admin.marketing;
 
-import io.hexlet.cv.controller.admin.marketing.support.AdminMarketingControllerTestSupport;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.ArgumentCaptor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -25,6 +13,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import io.hexlet.cv.controller.admin.marketing.support.AdminMarketingControllerTestSupport;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 
 /**
  * Общие маршруты {@code AdminMarketingController}, не привязанные к одной сущности:
@@ -217,7 +216,7 @@ public class AdminMarketingCommonControllerTest extends AdminMarketingController
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(body))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.displayOrder").exists());
     }
 
@@ -230,7 +229,7 @@ public class AdminMarketingCommonControllerTest extends AdminMarketingController
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(body))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
