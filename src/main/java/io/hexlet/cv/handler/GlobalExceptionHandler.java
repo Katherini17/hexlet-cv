@@ -1,6 +1,7 @@
 package io.hexlet.cv.handler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import io.hexlet.cv.handler.exception.InvalidPasswordException;
 import io.hexlet.cv.handler.exception.ResourceNotFoundException;
 import io.hexlet.cv.handler.exception.UserAlreadyExistsException;
@@ -53,7 +54,14 @@ public class GlobalExceptionHandler {
 
         String errorMessage = "Invalid JSON format";
 
-        if (ex.getCause() instanceof InvalidFormatException) {
+        if (ex.getCause() instanceof UnrecognizedPropertyException cause) {
+
+            errorMessage = String.format(
+                    "Unknown property '%s' is not allowed",
+                    cause.getPropertyName()
+            );
+
+        } else if (ex.getCause() instanceof InvalidFormatException) {
             InvalidFormatException cause = (InvalidFormatException) ex.getCause();
             if (cause.getTargetType().isEnum()) {
                 Class<? extends Enum> enumClass = (Class<? extends Enum>) cause.getTargetType();
