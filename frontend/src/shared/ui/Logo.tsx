@@ -10,6 +10,12 @@ interface LogoProps {
    * @defaultValue 'dark'
    */
   variant?: 'light' | 'dark'
+  /**
+   * Флаг для скрытия текстовой части логотипа на мобильных устройствах.
+   * Если `true`, текст скрывается на экранах меньше 'xs'.
+   * @defaultValue false
+   */
+  hideTextOnMobile?: boolean
 }
 
 /**
@@ -17,12 +23,16 @@ interface LogoProps {
  *
  * Отображает графическую иконку-терминал (`>_`) в синем блоке и текстовое
  * название сервиса. Поддерживает переключение цветовой схемы для корректного
- * отображения как на светлых, так и на тёмных фоновых подложках.
+ * отображения как на светлых, так и на тёмных фоновых подложках. Позволяет
+ * скрывать текстовую часть на мобильных экранах для экономии места.
  *
  * @param props - Конфигурационные свойства компонента `LogoProps`.
  * @returns {JSX.Element} Группа элементов, формирующих визуальный логотип.
  */
-export const Logo = ({ variant = 'dark' }: LogoProps) => {
+export const Logo = ({
+  variant = 'dark',
+  hideTextOnMobile = false,
+}: LogoProps) => {
   const logoTextColor = variant === 'dark' ? 'black' : 'white'
 
   return (
@@ -37,7 +47,7 @@ export const Logo = ({ variant = 'dark' }: LogoProps) => {
           &gt;_
         </Text>
       </ThemeIcon>
-      <Stack gap={0}>
+      <Stack gap={0} visibleFrom={hideTextOnMobile ? 'xs' : 'base'}>
         <Text fw={700} lh="xs" fz={14.5} c={logoTextColor}>
           Хекслет
         </Text>

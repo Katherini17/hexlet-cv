@@ -6,6 +6,9 @@ const theme = createTheme({
   primaryColor: 'blue',
   defaultRadius: 'md',
   fontFamily: 'Inter, -apple-system, Segoe UI, Roboto, sans-serif',
+  other: {
+    headerHeight: 64,
+  },
 })
 
 export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
