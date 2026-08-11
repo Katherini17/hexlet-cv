@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class TokenCookieService {
+public class  TokenCookieService {
 
     private final CookieProperties cookieProperties;
 

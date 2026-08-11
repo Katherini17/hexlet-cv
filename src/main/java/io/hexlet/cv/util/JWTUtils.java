@@ -20,9 +20,9 @@ public class JWTUtils {
 
     private final JwtEncoder encoder;
     private final JwtProperties jwtProperties;
-    private final JwtDecoder jwtDecoder;                                    // access-only, бин без квалификатора
+    private final JwtDecoder jwtDecoder;
     @Qualifier("refreshTokenDecoder")
-    private final JwtDecoder refreshTokenDecoder;                          // только для refresh-флоу
+    private final JwtDecoder refreshTokenDecoder;
     private final UserRepository userRepository;
 
     public String generateAccessToken(String username) {

@@ -47,7 +47,6 @@ public class TokenService {
             Jwt jwt = jwtUtils.decodeRefresh(refreshToken);
             userRepository.incrementTokenVersion(jwt.getSubject());
         } catch (JwtException ignored) {
-            // токен уже истёк/невалиден/повторный logout — отзывать нечего, это не ошибка
         }
     }
 

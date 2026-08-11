@@ -22,7 +22,7 @@ public class LogoutController {
     private final Inertia inertia;
 
     @PostMapping("/users/sign_out")
-    public ResponseEntity<?> logout(@CookieValue(value = "refresh_token", required = false) String refreshToken,
+    public ResponseEntity<String> logout(@CookieValue(value = "refresh_token", required = false) String refreshToken,
                                      HttpServletResponse response,
                                      HttpSession session) {
 
