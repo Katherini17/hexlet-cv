@@ -8,3 +8,17 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
+
+app:
+  security:
+    cookie:
+      access:
+        httpOnly: true
+        secure: true
+        sameSite: Strict
+        maxAgeSeconds: 900       # 15 минут
+      refresh:
+        httpOnly: true
+        secure: true
+        sameSite: Lax
+        maxAgeSeconds: 2592000   # 30 дней
