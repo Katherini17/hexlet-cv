@@ -57,6 +57,8 @@ dependencies {
     // DB
     runtimeOnly(libs.h2)
     implementation(libs.postgresql);
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
 
     // Tests
     testImplementation(libs.springBootStarterTest)
