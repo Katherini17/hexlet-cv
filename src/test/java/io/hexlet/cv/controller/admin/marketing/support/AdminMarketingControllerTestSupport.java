@@ -2,7 +2,6 @@ package io.hexlet.cv.controller.admin.marketing.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.inertia4j.spring.Inertia;
-import io.hexlet.cv.component.DataInitializer;
 import io.hexlet.cv.service.ArticleService;
 import io.hexlet.cv.service.EnumService;
 import io.hexlet.cv.service.PricingPlanService;
@@ -78,9 +77,6 @@ public abstract class AdminMarketingControllerTestSupport {
 
     @MockitoBean
     private PricingPlanService pricingPlanService;
-
-    @MockitoBean
-    private DataInitializer dataInitializer;
 
     protected MockMvc mockMvc() {
         return mockMvc;
