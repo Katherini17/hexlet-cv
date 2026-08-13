@@ -4,15 +4,15 @@ INSERT INTO users (id, email, first_name, last_name, encrypted_password,
                    role, state, locale, created_at, updated_at)
 VALUES
     (1, 'ivan@google.com', 'Иван', 'Иванов',
-     '$2b$12$p0Gopx04F448LitcYwYi7OBwJo9RuPilyF2qYp1NNDc2r.6QYV8ge',
+     '$2a$10$5ZcF/IRoH4X1gicCg.Be9OWt7eDHkY.SSy42D0XWjpwumbAeCv00S',
      1, CURRENT_TIMESTAMP, '127.0.0.1', 'CANDIDATE', 'active', 'ru',
      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (2, 'olga@yandex.ru', 'Ольга', 'Петрова',
-     '$2b$12$p0Gopx04F448LitcYwYi7OBwJo9RuPilyF2qYp1NNDc2r.6QYV8ge',
+     '$2a$10$5ZcF/IRoH4X1gicCg.Be9OWt7eDHkY.SSy42D0XWjpwumbAeCv00S',
      1, CURRENT_TIMESTAMP, '127.0.0.1', 'CANDIDATE', 'active', 'ru',
      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     (3, 'sergey@gmail.com', 'Сергей', 'Сидоров',
-     '$2b$12$p0Gopx04F448LitcYwYi7OBwJo9RuPilyF2qYp1NNDc2r.6QYV8ge',
+     '$2a$10$5ZcF/IRoH4X1gicCg.Be9OWt7eDHkY.SSy42D0XWjpwumbAeCv00S',
      1, CURRENT_TIMESTAMP, '127.0.0.1', 'ADMIN', 'active', 'ru',
      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
