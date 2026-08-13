@@ -23,7 +23,7 @@ spring:
     show-sql: false
     generate-ddl: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     output:
  #     ansi:
  #       enabled: always
