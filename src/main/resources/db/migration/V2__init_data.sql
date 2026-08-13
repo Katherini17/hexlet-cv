@@ -1,4 +1,6 @@
 -- users
+-- Пароль seed-пользователей: qweqweqwe
+-- Хранится в виде BCrypt-хэша, сгенерированного BCryptPasswordEncoder
 INSERT INTO users (id, email, first_name, last_name, encrypted_password,
                    sign_in_count, current_sign_in_at, current_sign_in_ip,
                    role, state, locale, created_at, updated_at)
