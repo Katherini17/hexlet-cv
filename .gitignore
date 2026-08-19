@@ -64,9 +64,16 @@ build
 # IDE
 .vscode/
 .specstory/
+.claude/
 
 # Configs
 config.json
 
 # Docs
 docs/
+
+# Secrets — issue #1222
+*.pem
+.env.*
+!.env.example
+certs/
