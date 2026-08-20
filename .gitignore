@@ -77,3 +77,7 @@ docs/
 .env.*
 !.env.example
 certs/
+
+# Тестовые key-фикстуры (не секреты) — issue #1222
+!src/test/resources/certs/
+!src/test/resources/certs/*.pem
