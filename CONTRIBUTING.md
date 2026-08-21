@@ -64,26 +64,5 @@
 
 [Подробные инструкции по работе с PR](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests)
 
-## Создание первого pull request
-* Создать ветку ( например firstPR )
-    ```bash
-    git checkout -b firstPR
-    ```
-* В файл FirstPR.txt написать приветственную фразу ( например Hello world ).
-* Закоммитеть изменения:
-    ```bash
-    git add . && git commit -m "This is the first PR"
-    git push --set-upstream origin firstPR
-    ```
-* Зайти на [основной репозиторий](https://github.com/Hexlet/hexlet-cv)  и создайть PR
-
-После того как PR будет принят, можно будет вернуться на ветку main, [обновить](https://docs.github.com/ru/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) репозитории и удалить ветку firstPR
-
-    ```bash
-    git checkout main
-    git pull 
-    git branch -d firstPR 
-    ```
-
 ### Спасибо за помощь `!`
 

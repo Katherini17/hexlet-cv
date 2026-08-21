@@ -12,8 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # env:
-    #   RAILS_ENV: test
 
     steps:
       - uses: actions/checkout@v4
@@ -21,10 +19,5 @@ jobs:
         with:
           node-version: '19'
           cache: 'npm'
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-
       - run: make ci-setup
       - run: make check

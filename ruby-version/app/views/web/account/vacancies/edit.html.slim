@@ -1,8 +1,0 @@
-- content_for :header do
-  = t('.header')
-
-- if @vacancy.archived?
-  .alert.alert-secondary
-    = t('.vacancy_archived')
-
-= render 'form', vacancy: @vacancy, url: account_vacancy_path(@vacancy), show_archive_button: !@vacancy.archived?

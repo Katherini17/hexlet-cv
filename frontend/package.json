@@ -27,23 +27,20 @@
     ]
   },
   "dependencies": {
-    "@inertiajs/inertia": "^0.11.1",
-    "@inertiajs/progress": "^0.1.2",
-    "@inertiajs/react": "^2.2.8",
     "@mantine/core": "^8.2.1",
     "@mantine/form": "^8.2.1",
     "@mantine/hooks": "^8.2.1",
     "@mantinex/dev-icons": "^2.0.0",
     "@tabler/icons-react": "^3.36.1",
     "@types/node": "^24.12.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-router": "^8.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
-    "@types/react": "^18.2.41",
-    "@types/react-dom": "^18.2.19",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^4.6.0",
     "cookie": "^1.1.1",
     "eslint": "^9.30.1",
