@@ -12,7 +12,6 @@ export default defineConfig({
       '@app': '/src/app',
       '@config': '/src/app/config',
       '@providers': '/src/app/providers',
-      '@inertia': '/src/app/providers/inertia',
       '@ui': '/src/app/providers/ui',
       '@pages': '/src/pages',
       '@shared': '/src/shared',
