@@ -21,7 +21,6 @@
 ├── docs/
 │   ├── design/           # дизайн «Хекслет Карьера»: скриншоты, прототипы, карта экранов
 │   └── RENDER_DEPLOY.md  # деплой на Render
-├── ruby-version/         # legacy-приложение на Rails (не развивается)
 └── Makefile              # команды backend
 ```
 
