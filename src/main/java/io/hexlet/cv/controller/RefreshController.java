@@ -32,6 +32,9 @@ public class RefreshController {
             response.addHeader(HttpHeaders.SET_COOKIE, cookies.refresh().toString());
             return ResponseEntity.noContent().build();
         } catch (BadCredentialsException e) {
+            var expired = tokenCookieService.buildExpiredCookies();
+            response.addHeader(HttpHeaders.SET_COOKIE, expired.access().toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, expired.refresh().toString());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
