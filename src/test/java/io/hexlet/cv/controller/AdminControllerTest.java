@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.hexlet.cv.model.User;
 import io.hexlet.cv.model.enums.RoleType;
 import io.hexlet.cv.repository.UserRepository;
-import io.hexlet.cv.util.JWTUtils;
+import io.hexlet.cv.support.TokenTestHelper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ class AdminControllerTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private JWTUtils jwtUtils;
+    private TokenTestHelper tokenHelper;
     @Autowired
     private BCryptPasswordEncoder encoder;
 
@@ -60,7 +60,7 @@ class AdminControllerTest {
     @Test
     void testAdminAccessPanel() throws Exception {
         // создаём access_token для ADMIN
-        var token = jwtUtils.generateAccessToken(ADMIN_EMAIL);
+        var token = tokenHelper.accessToken(ADMIN_EMAIL, "my_password");
 
         mockMvc.perform(get("/admin")
                         .cookie(new Cookie("access_token", token))
@@ -70,7 +70,7 @@ class AdminControllerTest {
 
     @Test
     void testCandidateAccessAdminPanel() throws Exception {
-        var token = jwtUtils.generateAccessToken(CANDIDATE_EMAIL);
+        var token = tokenHelper.accessToken(CANDIDATE_EMAIL, "candidat_password_test");
 
         mockMvc.perform(get("/admin")
                         .cookie(new Cookie("access_token", token))

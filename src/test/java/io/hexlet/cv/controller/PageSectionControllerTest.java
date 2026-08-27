@@ -16,7 +16,7 @@ import io.hexlet.cv.model.User;
 import io.hexlet.cv.model.enums.RoleType;
 import io.hexlet.cv.repository.PageSectionRepository;
 import io.hexlet.cv.repository.UserRepository;
-import io.hexlet.cv.util.JWTUtils;
+import io.hexlet.cv.support.TokenTestHelper;
 import io.hexlet.cv.utils.ModelGenerator;
 import jakarta.servlet.http.Cookie;
 import org.instancio.Instancio;
@@ -45,7 +45,7 @@ public class PageSectionControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JWTUtils jwtUtils;
+    private TokenTestHelper tokenHelper;
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -65,7 +65,7 @@ public class PageSectionControllerTest {
                 .encryptedPassword(encoder.encode("password"))
                 .role(RoleType.ADMIN)
                 .build());
-        return jwtUtils.generateAccessToken(ADMIN_EMAIL);
+        return tokenHelper.accessToken(ADMIN_EMAIL, "password");
     }
 
     private static PageSectionCreateDTO arbitraryPageSectionCreateDto() {
@@ -285,7 +285,7 @@ public class PageSectionControllerTest {
                 .role(RoleType.CANDIDATE)
                 .build());
         var dto = arbitraryPageSectionCreateDto();
-        var candidateToken = jwtUtils.generateAccessToken(CANDIDATE_EMAIL);
+        var candidateToken = tokenHelper.accessToken(CANDIDATE_EMAIL, "password");
 
         // when
         var result = mockMvc.perform(post("/api/pages/sections")
