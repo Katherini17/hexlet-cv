@@ -1,6 +1,10 @@
 package io.hexlet.cv.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.hexlet.cv.audit.AuditEventType;
+import io.hexlet.cv.audit.AuditLogger;
+import io.hexlet.cv.audit.AuditReason;
+import io.hexlet.cv.audit.AuditSubject;
 import io.hexlet.cv.service.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
@@ -11,7 +15,6 @@ import java.util.Set;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,15 +25,18 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,15 +51,19 @@ public class SecurityConfig {
                                  JwtDecoder jwtDecoder,
                                  BearerTokenResolver cookieTokenResolver,
                                  Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthConverter,
-                                 AuthenticationEntryPoint jsonAuthEntryPoint)
+                                 AuthenticationEntryPoint jsonAuthEntryPoint,
+                                 AccessDeniedHandler auditingAccessDeniedHandler)
             throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
+                // Отказ по роли возникает в фильтре, до DispatcherServlet, поэтому
+                // @ControllerAdvice его не видит - аудит пишется здесь
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jsonAuthEntryPoint)
+                        .accessDeniedHandler(auditingAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**", "/*/admin/**", "/*/admin/").hasRole("ADMIN")
-                        .requestMatchers("/api/pages/sections", "/api/pages/sections/**")
-                                .hasRole("ADMIN")
+                        .requestMatchers(AdminPaths.adminZonePatterns()).hasRole("ADMIN")
                         .requestMatchers("/account/**").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -69,11 +79,40 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationEntryPoint jsonAuthEntryPoint(ObjectMapper om) {
+    public AuthenticationEntryPoint jsonAuthEntryPoint(ObjectMapper om, AuditLogger auditLogger) {
         return (request, response, authException) -> {
+            auditLogger.logFailure(AuditEventType.UNAUTHORIZED, AuditSubject.current(),
+                    resolveUnauthorizedReason(authException), request);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             var body = Map.of("errors", Map.of("auth", "Authentication required or token invalid"));
+            response.getWriter().write(om.writeValueAsString(body));
+        };
+    }
+
+    /**
+     * Различает два повода для 401. Предъявленный и отвергнутый токен - след атаки или
+     * испорченной куки, отсутствующий токен - обычный незалогиненный запрос.
+     *
+     * @param authException исключение, с которым сработала точка входа
+     * @return причина отказа для записи в журнал
+     */
+    private static AuditReason resolveUnauthorizedReason(AuthenticationException authException) {
+        // Разбор токена ошибается через OAuth2AuthenticationException, в том числе
+        // через её наследника InvalidBearerTokenException
+        return authException instanceof OAuth2AuthenticationException
+                ? AuditReason.TOKEN_INVALID
+                : AuditReason.TOKEN_MISSING;
+    }
+
+    @Bean
+    public AccessDeniedHandler auditingAccessDeniedHandler(ObjectMapper om, AuditLogger auditLogger) {
+        return (request, response, accessDeniedException) -> {
+            auditLogger.logFailure(AuditEventType.ACCESS_DENIED, AuditSubject.current(),
+                    AuditReason.FORBIDDEN, request);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            var body = Map.of("errors", Map.of("Access denied error", "Access is denied"));
             response.getWriter().write(om.writeValueAsString(body));
         };
     }

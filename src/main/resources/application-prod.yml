@@ -1,3 +1,8 @@
+server:
+  # Без этого getRemoteAddr() вернёт адрес балансировщика, и поле ip в журнале аудита
+  # окажется одинаковым во всех записях.
+  forward-headers-strategy: framework
+
 spring:
   datasource:
     url:  ${JDBC_DATABASE_URL}

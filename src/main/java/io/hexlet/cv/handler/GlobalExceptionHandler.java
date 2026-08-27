@@ -1,6 +1,10 @@
 package io.hexlet.cv.handler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import io.hexlet.cv.audit.AuditEventType;
+import io.hexlet.cv.audit.AuditLogger;
+import io.hexlet.cv.audit.AuditReason;
+import io.hexlet.cv.audit.AuditSubject;
 import io.hexlet.cv.handler.exception.InvalidPasswordException;
 import io.hexlet.cv.handler.exception.ResourceNotFoundException;
 import io.hexlet.cv.handler.exception.UserAlreadyExistsException;
@@ -10,7 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +30,10 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @Slf4j
 @ControllerAdvice
+@AllArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final AuditLogger auditLogger;
 
     private Object commonHandle(Map<String, String> errors,
                                 HttpServletRequest request,
@@ -132,6 +139,10 @@ public class GlobalExceptionHandler {
     public Object handleAccessDenied(AccessDeniedException ex,
                                      HttpServletRequest request,
                                      RedirectAttributes redirectAttributes) {
+        // Сюда доходит только отказ от @PreAuthorize: отказ по правилам цепочки фильтров
+        // перехватывает AccessDeniedHandler в SecurityConfig
+        auditLogger.logFailure(AuditEventType.ACCESS_DENIED, AuditSubject.current(),
+                AuditReason.FORBIDDEN, request);
         Map<String, String> errors = Map.of("Access denied error", ex.getMessage());
         if ("true".equals(request.getHeader("X-Inertia"))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("errors", errors));
@@ -145,6 +156,11 @@ public class GlobalExceptionHandler {
                             HttpServletRequest request,
                             RedirectAttributes redirectAttributes) {
         log.error("Internal server error", ex);
+
+        // Для админских путей это вытеснит запись интерцептора: ADMIN_ACTION с исходом
+        // SERVER_ERROR говорит меньше, чем сам факт необработанного исключения
+        auditLogger.logFailure(AuditEventType.UNHANDLED_ERROR, AuditSubject.current(),
+                AuditReason.SERVER_ERROR, request);
 
         Map<String, String> errors = Map.of("error", "Internal server error");
         return commonHandle(errors, request, redirectAttributes, HttpStatus.INTERNAL_SERVER_ERROR);

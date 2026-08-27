@@ -2,8 +2,8 @@ package io.hexlet.cv.audit;
 
 import java.text.BreakIterator;
 import java.text.Normalizer;
-import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Маскирует email перед записью в аудит-лог.
@@ -12,19 +12,23 @@ import java.util.Locale;
  * поэтому буквы любого письма проходят, а управляющие и невидимые символы отсекаются.
  */
 public final class PiiMasker {
-    private static final String EMPTY_STRING = "-";
     private static final String MASK = "***";
-    private static final int MAX_VISIBLE_GRAPHEMES = 2;
 
     private PiiMasker() {
     }
 
+    /**
+     * Маскирует адрес. На любом непустом входе возвращает непустой результат, а на входе,
+     * непохожем на email, - одну маску. Решение "субъекта нет" сюда не входит:
+     * подстановкой плейсхолдера занимается AuditLogger.
+     *
+     * @param input исходное значение, не null
+     * @return замаскированный адрес либо одна маска
+     */
     public static String maskEmail(String input) {
-        if (input == null || input.isBlank()) {
-            return EMPTY_STRING;
-        }
+        Objects.requireNonNull(input, "Отсутствие субъекта обрабатывает AuditLogger, а не маскировщик");
         var normalized = Normalizer.normalize(input.trim(), Normalizer.Form.NFC);
-        if (normalized.codePoints().anyMatch(PiiMasker::isUnsafeCodePoint)) {
+        if (normalized.isEmpty() || !LogFieldSanitizer.isSafe(normalized)) {
             return MASK;
         }
         int domainSepPos = normalized.indexOf('@');
@@ -36,25 +40,6 @@ public final class PiiMasker {
         var localPart = normalized.substring(0, domainSepPos);
         var domainPart = normalized.substring(domainSepPos + 1);
         return maskLocalPart(localPart) + "@" + domainPart;
-    }
-
-    /**
-     * Проверяет, что code point нельзя писать в лог ни в каком виде.
-     * Отсекаются управляющие символы и разделители строк (подделка строк лога),
-     * форматирующие символы - zero-width и bidi-override (визуальная подмена адреса),
-     * пробельные разделители включая NBSP, одиночные суррогаты, private use и неназначенные
-     * code point. Буквы, цифры и комбинирующие знаки любого письма считаются безопасными.
-     *
-     * @param codePoint проверяемый code point
-     * @return true, если такой символ нельзя писать в лог
-     */
-    private static boolean isUnsafeCodePoint(int codePoint) {
-        return switch (Character.getType(codePoint)) {
-            case Character.CONTROL, Character.FORMAT, Character.SURROGATE, Character.PRIVATE_USE,
-                 Character.UNASSIGNED, Character.SPACE_SEPARATOR, Character.LINE_SEPARATOR,
-                 Character.PARAGRAPH_SEPARATOR -> true;
-            default -> false;
-        };
     }
 
     /**
@@ -70,14 +55,14 @@ public final class PiiMasker {
     private static String maskLocalPart(String localPart) {
         var iterator = BreakIterator.getCharacterInstance(Locale.ROOT);
         iterator.setText(localPart);
-        var boundaries = new ArrayList<Integer>();
-        for (int end = iterator.next(); end != BreakIterator.DONE; end = iterator.next()) {
-            boundaries.add(end);
-        }
-        int visible = Math.min(MAX_VISIBLE_GRAPHEMES, boundaries.size() - 1);
-        if (visible <= 0) {
+
+        // Дальше третьей границы результат уже не меняется, поэтому строка не обходится целиком
+        int first = iterator.next();
+        int second = iterator.next();
+        if (second == BreakIterator.DONE) {
             return MASK;
         }
-        return localPart.substring(0, boundaries.get(visible - 1)) + MASK;
+        int third = iterator.next();
+        return localPart.substring(0, third == BreakIterator.DONE ? first : second) + MASK;
     }
 }

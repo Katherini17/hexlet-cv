@@ -1,4 +1,8 @@
 app:
+  audit:
+    alerts:
+      enabled: false
+
   security:
     cookie:
       access:

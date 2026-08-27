@@ -27,7 +27,7 @@ public class TokenService {
         );
     }
 
-    public Tokens refresh(String refreshToken) {
+    public RefreshResult refresh(String refreshToken) {
         Jwt jwt;
         try {
             jwt = jwtUtils.decodeRefresh(refreshToken);
@@ -35,9 +35,12 @@ public class TokenService {
             throw new BadCredentialsException("Invalid refresh token", e);
         }
         String email = jwt.getSubject();
-        return new Tokens(
-                jwtUtils.generateAccessToken(email),
-                jwtUtils.generateRefreshToken(email)
+        return new RefreshResult(
+                new Tokens(
+                        jwtUtils.generateAccessToken(email),
+                        jwtUtils.generateRefreshToken(email)
+                ),
+                email
         );
     }
 
@@ -51,5 +54,16 @@ public class TokenService {
     }
 
     public record Tokens(String access, String refresh) {
+    }
+
+    /**
+     * Выданные токены вместе с тем, кому они выданы. Субъект возвращается отдельно, а не
+     * полем Tokens: обновление - единственный сценарий, где вызывающий не знает субъекта
+     * заранее, и журналу нужен именно тот адрес, что стоял в проверенном токене.
+     *
+     * @param tokens  новая пара токенов
+     * @param subject владелец предъявленного refresh-токена
+     */
+    public record RefreshResult(Tokens tokens, String subject) {
     }
 }

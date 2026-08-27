@@ -20,8 +20,10 @@ public class RegistrationService {
 
     public RegistrationResponseDTO registration(RegistrationRequestDTO inputDTO) {
 
+        // Email не подставляется в текст: сообщение уходит и в ответ, и в стектрейс,
+        // а адрес должен попадать в журнал только через маскировку - полем subject
         userRepository.findByEmail(inputDTO.getEmail()).ifPresent(user -> {
-            throw new UserAlreadyExistsException("Пользователь с email " + user.getEmail() + " уже существует");
+            throw new UserAlreadyExistsException("Пользователь с таким email уже существует");
         });
 
         var newUserData = registrationMapper.map(inputDTO);

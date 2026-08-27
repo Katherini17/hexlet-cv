@@ -39,6 +39,16 @@ server:
     include-exception: false
 
 app:
+  audit:
+    # Читается напрямую logback-spring.xml, аппендер поднимается только в профиле prod
+    file:
+      path: logs/audit.log
+    alerts:
+      enabled: true
+      window: 5m
+      failure-threshold: 10
+      max-tracked-keys: 10000
+
   security:
     cookie:
       access:
@@ -56,3 +66,7 @@ app:
       refresh-token-validity-seconds: 2592000   # 30 дней
       issuer: hexlet-cv
       audience: hexlet-cv-frontend
+
+logging:
+  level:
+    io.hexlet.cv.audit: info
