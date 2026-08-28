@@ -519,6 +519,16 @@ CREATE TABLE versions (
                           PRIMARY KEY (id)
 );
 
+CREATE TABLE refresh_tokens (
+                                jti UUID PRIMARY KEY,
+                                user_id BIGINT NOT NULL,
+                                family_id UUID NOT NULL,
+                                issued_at TIMESTAMP(6) NOT NULL,
+                                expires_at TIMESTAMP(6) NOT NULL,
+                                revoked_at TIMESTAMP(6),
+                                replaced_by_jti UUID
+);
+
 CREATE INDEX idx_ci_career_id on career_items (career_id);
 CREATE INDEX idx_ci_career_step_id on career_items (career_step_id);
 CREATE INDEX idx_cmv_item_type on career_member_versions (item_type);
@@ -566,6 +576,9 @@ CREATE INDEX idx_vacancy_creator_id on vacancies (creator_id);
 CREATE INDEX idx_vacancy_external_id on vacancies (external_id);
 CREATE INDEX idx_versions_item_type on versions (item_type);
 CREATE INDEX idx_versions_item_id on versions (item_id);
+CREATE INDEX idx_refresh_tokens_family ON refresh_tokens (family_id, revoked_at);
+CREATE INDEX idx_refresh_tokens_user ON refresh_tokens (user_id);
+CREATE INDEX idx_refresh_tokens_expires ON refresh_tokens (expires_at);
 
 ALTER TABLE career_items
     ADD CONSTRAINT fk_career_items_career
@@ -706,3 +719,8 @@ ALTER TABLE vacancies
 ALTER TABLE vacancies
     ADD CONSTRAINT fk_vacancies_creator
         FOREIGN KEY (creator_id) REFERENCES users;
+
+ALTER TABLE refresh_tokens
+    ADD CONSTRAINT fk_refresh_tokens_user
+        FOREIGN KEY (user_id) REFERENCES users(id);
+
