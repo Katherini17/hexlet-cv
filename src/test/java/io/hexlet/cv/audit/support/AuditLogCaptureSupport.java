@@ -41,8 +41,6 @@ public abstract class AuditLogCaptureSupport {
         appender.start();
 
         auditLogger = (Logger) LoggerFactory.getLogger(AuditLogger.LOGGER_NAME);
-        // Фильтр по уровню отрабатывает раньше appender'а, а секции logging
-        // в application-test.yml нет: без явной установки тест зависит от прод-настроек
         previousLevel = auditLogger.getLevel();
         auditLogger.setLevel(Level.INFO);
         auditLogger.addAppender(appender);

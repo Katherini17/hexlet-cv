@@ -59,8 +59,6 @@ public class AuditLogger {
                           AuditReason reason, HttpServletRequest request) {
         try {
             var level = resolveLevel(outcome, reason);
-            // Аргументы строятся до вызова log, а маскировка и проверка полей стоят дороже
-            // самой записи: отключённый уровень отсекается раньше, чем они посчитаются
             if (!AUDIT_LOG.isEnabledForLevel(level) || isAlreadyLogged(request)) {
                 return;
             }

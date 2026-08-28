@@ -139,8 +139,6 @@ public class GlobalExceptionHandler {
     public Object handleAccessDenied(AccessDeniedException ex,
                                      HttpServletRequest request,
                                      RedirectAttributes redirectAttributes) {
-        // Сюда доходит только отказ от @PreAuthorize: отказ по правилам цепочки фильтров
-        // перехватывает AccessDeniedHandler в SecurityConfig
         auditLogger.logFailure(AuditEventType.ACCESS_DENIED, AuditSubject.current(),
                 AuditReason.FORBIDDEN, request);
         Map<String, String> errors = Map.of("Access denied error", ex.getMessage());
@@ -157,8 +155,6 @@ public class GlobalExceptionHandler {
                             RedirectAttributes redirectAttributes) {
         log.error("Internal server error", ex);
 
-        // Для админских путей это вытеснит запись интерцептора: ADMIN_ACTION с исходом
-        // SERVER_ERROR говорит меньше, чем сам факт необработанного исключения
         auditLogger.logFailure(AuditEventType.UNHANDLED_ERROR, AuditSubject.current(),
                 AuditReason.SERVER_ERROR, request);
 

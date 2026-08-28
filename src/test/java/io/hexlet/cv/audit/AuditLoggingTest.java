@@ -51,15 +51,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 @ActiveProfiles("test")
 class AuditLoggingTest extends AuditLogCaptureSupport {
 
-    // Маркеры, которых нет больше нигде в журнале: на слове "test" из образца
-    // LoginControllerTest ассерт doesNotContain ничего бы не доказывал
     private static final String USER_EMAIL = "audit-subject@gmail.com";
     private static final String USER_LOCAL_PART = "audit-subject";
     private static final String MASKED_USER_EMAIL = "au***@gmail.com";
     private static final String PASSWORD = "pwd-marker-9f3a";
 
-    // Локальная часть начинается не с "au": иначе маска совпала бы с маской USER_EMAIL,
-    // и проверка субъекта регистрации проходила бы при записи чужого адреса
     private static final String NEW_USER_EMAIL = "newcomer-audit@gmail.com";
     private static final String NEW_USER_LOCAL_PART = "newcomer-audit";
     private static final String MASKED_NEW_USER_EMAIL = "ne***@gmail.com";
@@ -70,7 +66,6 @@ class AuditLoggingTest extends AuditLogCaptureSupport {
 
     private static final String PLACEHOLDER = "-";
 
-    // Порядок полей - часть контракта: по нему строятся grep и алерты
     private static final Pattern AUDIT_LINE = Pattern.compile(
             "^\\[AUDIT\\] event=(?<event>\\S+) subject=(?<subject>\\S+) outcome=(?<outcome>\\S+) "
                     + "reason=(?<reason>\\S+) ip=(?<ip>\\S+) method=(?<method>\\S+) path=(?<path>\\S+)$");
@@ -93,8 +88,6 @@ class AuditLoggingTest extends AuditLogCaptureSupport {
     @Autowired
     private JWTUtils jwtUtils;
 
-    // Сбой выдачи токенов иначе не воспроизвести: сервис поднят настоящий,
-    // и падает только в том тесте, который этого требует
     @MockitoSpyBean
     private TokenService tokenService;
 
@@ -193,8 +186,6 @@ class AuditLoggingTest extends AuditLogCaptureSupport {
         assertThat(auditFields(singleAuditEvent()))
                 .containsEntry("event", AuditEventType.TOKEN_REFRESH.name())
                 .containsEntry("outcome", AuditOutcome.SUCCESS.name())
-                // Аутентифицированного пользователя в контексте нет: access-токен уже истёк.
-                // Субъект должен прийти из проверенного refresh-токена
                 .containsEntry("subject", MASKED_USER_EMAIL);
     }
 
@@ -264,8 +255,6 @@ class AuditLoggingTest extends AuditLogCaptureSupport {
 
     @Test
     void shouldLogUnhandledErrorWithErrorLevel() {
-        // Через MockMvc такое исключение не воспроизвести: нужен эндпоинт, который падает.
-        // Обработчик вызывается напрямую - проверяется именно его запись в журнал
         var request = new MockHttpServletRequest("GET", "/api/unstable/endpoint");
         request.setRemoteAddr("127.0.0.1");
 

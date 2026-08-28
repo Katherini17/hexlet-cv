@@ -37,7 +37,6 @@ public class LoginFailureRateDetector {
         if (!properties.isEnabled()) {
             return;
         }
-        // Часы читаются один раз на попытку: обе размерности считают одно и то же событие
         var now = Instant.now();
         register(AuditAlertScope.IP, request == null ? null : request.getRemoteAddr(), now);
         register(AuditAlertScope.SUBJECT, subject, now);
@@ -58,14 +57,10 @@ public class LoginFailureRateDetector {
         var key = scope.name() + ":" + value;
         var window = properties.getWindow();
 
-        // Порядок проверок важен: пока место есть, до поиска ключа дело не доходит
         if (!hasRoomForNewKey(now, window) && !windows.containsKey(key)) {
             return;
         }
 
-        // Ключ удаляется, а не обнуляется: следующий алерт по нему возможен только после
-        // ещё одной полной серии - иначе перебор зальёт журнал. Удаление и служит признаком
-        // срабатывания, поэтому счёт наружу выносить нечем - он равен порогу
         var updated = windows.compute(key, (ignored, current) -> {
             var next = current == null || isExpired(current, now, window)
                     ? new Window(now, 1)

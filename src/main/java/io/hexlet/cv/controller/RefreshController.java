@@ -29,10 +29,6 @@ public class RefreshController {
     public ResponseEntity<Void> refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken,
                                          HttpServletRequest request,
                                          HttpServletResponse response) {
-        // Субъект из контекста нужен только веткам отказа: обновление идёт по refresh-куке,
-        // когда access-токен уже истёк, и аутентифицированного пользователя в контексте нет.
-        // На успехе субъект берётся из проверенного токена - иначе запись об обновлении
-        // не к кому отнести
         var subject = AuditSubject.current();
 
         if (refreshToken == null) {
@@ -47,8 +43,6 @@ public class RefreshController {
             auditLogger.logSuccess(AuditEventType.TOKEN_REFRESH, refreshed.subject(), request);
             return ResponseEntity.noContent().build();
         } catch (BadCredentialsException e) {
-            // Субъект отвергнутого токена в журнал не идёт: подпись не сошлась,
-            // и указанному в нём адресу верить нельзя
             auditLogger.logFailure(AuditEventType.TOKEN_REFRESH, subject, AuditReason.TOKEN_INVALID, request);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

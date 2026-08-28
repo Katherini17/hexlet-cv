@@ -23,9 +23,7 @@ class PiiMaskerTest {
                 Arguments.of("пробелы по краям", "  user@example.com  ", "us***@example.com"),
                 Arguments.of("кириллица", "остап@рога-и-копыта.рф", "ос***@рога-и-копыта.рф"),
                 Arguments.of("умлаут в NFC", "schön@beispiel.de", "sc***@beispiel.de"),
-                // Тот же адрес в NFD: o + U+0308. После нормализации результат должен совпасть с NFC
                 Arguments.of("умлаут в NFD", "scho\u0308n@beispiel.de", "sc***@beispiel.de"),
-                // эмодзи вне BMP: суррогатная пара должна остаться целой
                 Arguments.of("эмодзи", "😀user@mail.ru", "😀u***@mail.ru")
         );
     }
@@ -47,7 +45,6 @@ class PiiMaskerTest {
                 Arguments.of("два символа @", "user@@example.com"),
                 Arguments.of("@ первым символом", "@example.com"),
                 Arguments.of("@ последним символом", "user@"),
-                // JWT в слоте субъекта: в base64url нет '@', поэтому адрес не распознаётся
                 Arguments.of("jwt вместо субъекта", "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ4In0.c2ln")
         );
     }

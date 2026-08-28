@@ -56,7 +56,6 @@ public final class PiiMasker {
         var iterator = BreakIterator.getCharacterInstance(Locale.ROOT);
         iterator.setText(localPart);
 
-        // Дальше третьей границы результат уже не меняется, поэтому строка не обходится целиком
         int first = iterator.next();
         int second = iterator.next();
         if (second == BreakIterator.DONE) {

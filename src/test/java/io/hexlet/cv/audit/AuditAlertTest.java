@@ -36,8 +36,6 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 @ActiveProfiles("test")
 class AuditAlertTest extends AuditLogCaptureSupport {
 
-    // Маркеры, которых нет в остальном журнале: на общем слове ассерт doesNotContain
-    // ничего бы не доказывал
     private static final String EMAIL_LOCAL_PART = "alert-probe";
     private static final String EMAIL_DOMAIN = "@example.com";
     private static final String MASKED_EMAIL_PREFIX = "al***";
@@ -45,7 +43,6 @@ class AuditAlertTest extends AuditLogCaptureSupport {
 
     private static final String ALERT_PREFIX = "[AUDIT-ALERT]";
 
-    // Порядок полей - часть контракта: по нему строится оповещение
     private static final Pattern ALERT_LINE = Pattern.compile(
             "^\\[AUDIT-ALERT\\] alert=(?<alert>\\S+) scope=(?<scope>\\S+) key=(?<key>\\S+) "
                     + "count=(?<count>\\d+) window=(?<window>\\d+)s$");
@@ -56,8 +53,6 @@ class AuditAlertTest extends AuditLogCaptureSupport {
     @Autowired
     private ObjectMapper om;
 
-    // Пороги читаются из тех же properties, что и приложение: иначе тест мог бы
-    // проверять число, с которым детектор не работает
     @Autowired
     private AuditAlertProperties properties;
 
@@ -79,7 +74,6 @@ class AuditAlertTest extends AuditLogCaptureSupport {
     @Test
     void shouldAlertOnSpikeFromSingleAddress() throws Exception {
         var ip = "10.0.0.2";
-        // Адреса разные: сработать должен счётчик узла, а не счётчик аккаунта
         for (int attempt = 1; attempt <= threshold(); attempt++) {
             failedLogin(EMAIL_LOCAL_PART + "-addr-" + attempt + EMAIL_DOMAIN, ip);
         }
@@ -98,7 +92,6 @@ class AuditAlertTest extends AuditLogCaptureSupport {
     @Test
     void shouldAlertOnSpikeAgainstSingleAccount() throws Exception {
         var email = EMAIL_LOCAL_PART + "-account" + EMAIL_DOMAIN;
-        // Узлы разные: подбор пароля к одному аккаунту с ботнета виден только по субъекту
         for (int attempt = 1; attempt <= threshold(); attempt++) {
             failedLogin(email, "10.0.1." + attempt);
         }

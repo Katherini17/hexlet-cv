@@ -57,8 +57,6 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-                // Отказ по роли возникает в фильтре, до DispatcherServlet, поэтому
-                // @ControllerAdvice его не видит - аудит пишется здесь
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jsonAuthEntryPoint)
                         .accessDeniedHandler(auditingAccessDeniedHandler))
@@ -98,8 +96,6 @@ public class SecurityConfig {
      * @return причина отказа для записи в журнал
      */
     private static AuditReason resolveUnauthorizedReason(AuthenticationException authException) {
-        // Разбор токена ошибается через OAuth2AuthenticationException, в том числе
-        // через её наследника InvalidBearerTokenException
         return authException instanceof OAuth2AuthenticationException
                 ? AuditReason.TOKEN_INVALID
                 : AuditReason.TOKEN_MISSING;

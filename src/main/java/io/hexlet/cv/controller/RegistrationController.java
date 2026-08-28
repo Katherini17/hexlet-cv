@@ -53,12 +53,6 @@ public class RegistrationController {
                                HttpServletResponse response,
                                HttpSession session) {
 
-        // Аудит пишется здесь, а не в обработчике исключения: тип события известен только
-        // на эндпоинте, а UserAlreadyExistsException может прилететь и из другого сценария.
-        // Выдача токенов входит в ту же попытку: пользователь уже сохранён, но запрос
-        // завершится ошибкой, и запись об успехе увела бы журнал от того, что произошло.
-        // Прочие ошибки намеренно не перехватываются - отметки о записи ещё нет,
-        // и событие запишет handleAll как необработанную ошибку
         TokenService.Tokens tokens;
         try {
             userService.registration(inputDTO);
@@ -71,8 +65,6 @@ public class RegistrationController {
                     AuditReason.EMAIL_TAKEN, request);
             throw e;
         } catch (AuthenticationException e) {
-            // Учётная запись только что создана, поэтому отказ на этой стадии - не отказ
-            // в доступе, а внутренний сбой: в анализ всплесков он не идёт
             auditLogger.logFailure(AuditEventType.REGISTRATION, inputDTO.getEmail(),
                     AuditReason.AUTHENTICATION_FAILED, request);
             throw e;

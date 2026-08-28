@@ -45,8 +45,6 @@ public class LogoutController {
 
         session.setAttribute("flash", Map.of("success", true));
 
-        // Выход без refresh-токена куки очистит, но отзывать нечего: для журнала это
-        // аномалия - сессия завершается без подтверждённого токена
         if (refreshToken == null) {
             auditLogger.logFailure(AuditEventType.LOGOUT, subject, AuditReason.TOKEN_MISSING, request);
         } else {

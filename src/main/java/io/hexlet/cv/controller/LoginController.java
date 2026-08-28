@@ -53,10 +53,6 @@ public class LoginController {
                                    HttpServletResponse response,
                                    HttpSession session) {
 
-        // Аудит пишется здесь, а не в обработчике исключения: тип события известен только
-        // на эндпоинте, а те же исключения бросаются и вне сценария входа.
-        // Выдача токенов входит в ту же попытку: сбой на ней - это тоже неудачный вход,
-        // и без него в журнале не осталось бы ни успеха, ни провала
         TokenService.Tokens tokens;
         try {
             loginService.login(loginDTO);
@@ -66,7 +62,6 @@ public class LoginController {
             );
         } catch (UserNotFoundException | InvalidPasswordException | AuthenticationException e) {
             auditLogger.logFailure(AuditEventType.LOGIN, loginDTO.getEmail(), loginFailureReason(e), request);
-            // Несуществующий адрес передается в анализ всплесков наравне с неверным паролем
             loginFailureRateDetector.recordFailure(loginDTO.getEmail(), request);
             throw e;
         }
@@ -95,8 +90,6 @@ public class LoginController {
         if (e instanceof InvalidPasswordException) {
             return AuditReason.INVALID_PASSWORD;
         }
-        // Пароль уже проверен сервисом, поэтому отказ на этой стадии - не он:
-        // рассинхрон с AuthenticationManager либо заблокированная учётная запись
         return AuditReason.AUTHENTICATION_FAILED;
     }
 }
