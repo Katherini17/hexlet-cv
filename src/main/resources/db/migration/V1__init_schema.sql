@@ -436,6 +436,7 @@ CREATE TABLE users (
                        resume_answer_likes_count integer,
                        resume_mail_enabled boolean,
                        sign_in_count integer,
+                       token_version bigint NOT NULL DEFAULT 0,
                        confirmation_sent_at timestamp(6),
                        confirmed_at timestamp(6),
                        created_at timestamp(6),
