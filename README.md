@@ -20,9 +20,43 @@
 ├── frontend/             # React frontend (Vite)
 ├── docs/
 │   ├── design/           # дизайн «Хекслет Карьера»: скриншоты, прототипы, карта экранов
+│   ├── specs/            # спеки по issue (детальные планы/дизайны)
 │   └── RENDER_DEPLOY.md  # деплой на Render
 └── Makefile              # команды backend
 ```
+
+## Архитектура backend
+
+Пакеты в `src/main/java/io/hexlet/cv`:
+
+| Пакет | Назначение |
+|---|---|
+| `controller` | HTTP-контроллеры (MVC-страницы + REST/admin API) |
+| `service` | бизнес-логика |
+| `repository` | доступ к данным (Spring Data JPA) |
+| `model` | JPA-сущности |
+| `dto` / `mapper` / `converter` | транспорт и маппинг между слоями |
+| `security` | JWT, ротация refresh-токенов, хранилище `refresh_tokens` |
+| `config` | конфигурация (Security, JWT, cookie, locale, Inertia) |
+| `validator` | валидация |
+| `handler` | обработка ошибок |
+| `util` | вспомогательные классы (JWTUtils и т.п.) |
+| `component` | вспомогательные компоненты |
+
+## Безопасность (JWT)
+
+- JWT (RSA / RS256). `access_token` (15 мин) и `refresh_token` (30 дней) в HttpOnly / Secure / SameSite cookie.
+- Ротация refresh-токенов с детектом повторного использования: `jti` + таблица `refresh_tokens` (`family_id`, `revoked_at`, `replaced_by_jti`).
+- Per-session logout (гасит семейство токенов), глобальный отзыв через `tokenVersion`.
+- Детали и план релиза — [docs/specs/1215-refresh-token-rotation.md](docs/specs/1215-refresh-token-rotation.md).
+
+## Спеки по issue
+
+Детальные планы/дизайны по задачам лежат в `docs/specs/<номер>-<имя>.md`. Меняется логика системы — обновляй и этот README, и спеку.
+
+| Issue | Документ |
+|---|---|
+| #1215 — ротация и отзыв refresh-токенов | [docs/specs/1215-refresh-token-rotation.md](docs/specs/1215-refresh-token-rotation.md) |
 
 ## Быстрый старт
 
