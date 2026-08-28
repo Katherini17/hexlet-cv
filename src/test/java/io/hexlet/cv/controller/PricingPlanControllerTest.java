@@ -15,7 +15,7 @@ import io.hexlet.cv.model.admin.marketing.PricingPlan;
 import io.hexlet.cv.model.enums.RoleType;
 import io.hexlet.cv.repository.PricingPlanRepository;
 import io.hexlet.cv.repository.UserRepository;
-import io.hexlet.cv.util.JWTUtils;
+import io.hexlet.cv.support.TokenTestHelper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ public class PricingPlanControllerTest {
     private PricingPlanRepository pricingPlanRepository;
 
     @Autowired
-    private JWTUtils jwtUtils;
+    private TokenTestHelper tokenHelper;
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -85,7 +85,7 @@ public class PricingPlanControllerTest {
     }
 
     private String generateToken(User user) {
-        return jwtUtils.generateAccessToken(user.getEmail());
+        return tokenHelper.accessToken(user.getEmail(), "password");
     }
 
     @Test

@@ -14,7 +14,7 @@ import io.hexlet.cv.model.admin.marketing.Article;
 import io.hexlet.cv.model.enums.RoleType;
 import io.hexlet.cv.repository.ArticleRepository;
 import io.hexlet.cv.repository.UserRepository;
-import io.hexlet.cv.util.JWTUtils;
+import io.hexlet.cv.support.TokenTestHelper;
 import jakarta.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
@@ -45,7 +45,7 @@ public class ArticleControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JWTUtils jwtUtils;
+    private TokenTestHelper tokenHelper;
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -89,7 +89,7 @@ public class ArticleControllerTest {
     }
 
     private String generateToken(User user) {
-        return jwtUtils.generateAccessToken(user.getEmail());
+        return tokenHelper.accessToken(user.getEmail(), "password");
     }
 
     @Test
@@ -256,7 +256,7 @@ public class ArticleControllerTest {
         candidate.setRole(RoleType.CANDIDATE);
         userRepository.save(candidate);
 
-        String candidateToken = jwtUtils.generateAccessToken("candidate@example.com");
+        String candidateToken = tokenHelper.accessToken("candidate@example.com", "password");
 
         mockMvc.perform(get("/admin/marketing/articles")
                         .cookie(new Cookie("access_token", candidateToken))
