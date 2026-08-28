@@ -15,7 +15,7 @@ import io.hexlet.cv.repository.KnowledgeArticleRepository;
 import io.hexlet.cv.repository.KnowledgeInterviewRepository;
 import io.hexlet.cv.repository.UserRepository;
 import io.hexlet.cv.service.KnowledgeService;
-import io.hexlet.cv.util.JWTUtils;
+import io.hexlet.cv.support.TokenTestHelper;
 import jakarta.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import lombok.SneakyThrows;
@@ -53,7 +53,7 @@ public class KnowledgeControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JWTUtils jwtUtils;
+    private TokenTestHelper tokenHelper;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -78,7 +78,7 @@ public class KnowledgeControllerTest {
                 .role(RoleType.CANDIDATE)
                 .build();
         userRepository.save(candidateUser);
-        candidateToken = jwtUtils.generateAccessToken(CANDIDATE_EMAIL);
+        candidateToken = tokenHelper.accessToken(CANDIDATE_EMAIL, "password");
     }
 
     @AfterEach

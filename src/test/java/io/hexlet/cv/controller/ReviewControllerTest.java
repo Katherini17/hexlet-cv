@@ -17,7 +17,7 @@ import io.hexlet.cv.model.admin.marketing.Review;
 import io.hexlet.cv.model.enums.RoleType;
 import io.hexlet.cv.repository.ReviewRepository;
 import io.hexlet.cv.repository.UserRepository;
-import io.hexlet.cv.util.JWTUtils;
+import io.hexlet.cv.support.TokenTestHelper;
 import jakarta.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
@@ -48,7 +48,7 @@ public class ReviewControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JWTUtils jwtUtils;
+    private TokenTestHelper tokenHelper;
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -90,13 +90,13 @@ public class ReviewControllerTest {
     }
 
     private String generateToken(User user) {
-        return jwtUtils.generateAccessToken(user.getEmail());
+        return tokenHelper.accessToken(user.getEmail(), "password");
     }
 
     @Test
     public void testGetReviewsSection() throws Exception {
         var admin = createUser(ADMIN_EMAIL, RoleType.ADMIN);
-        String adminToken = jwtUtils.generateAccessToken(ADMIN_EMAIL);
+        String adminToken = tokenHelper.accessToken(ADMIN_EMAIL, "password");
         createReview("Test Author", true);
 
         createReview("Test Author", true);

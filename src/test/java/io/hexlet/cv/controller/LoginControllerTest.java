@@ -1,5 +1,7 @@
 package io.hexlet.cv.controller;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,12 +27,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class LoginControllerTest {
 
     @Autowired
@@ -177,6 +181,26 @@ public class LoginControllerTest {
                         Matchers.hasItem(Matchers.containsString("access_token"))))
                 .andExpect(header().stringValues(HttpHeaders.SET_COOKIE,
                         Matchers.hasItem(Matchers.containsString("refresh_token"))));
+    }
+
+    @Test
+    void loginSetsHardenedCookieAttributes() throws Exception {
+        var dto = new LoginRequestDTO();
+        dto.setEmail(userData.getEmail());
+        dto.setPassword(testPassword);
+
+        mockMvc.perform(post("/users/sign_in")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(dto))
+                        .header("X-Inertia", "true")
+                        .header("Referer", "/users/sign_in"))
+                .andExpect(status().isFound())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, allOf(
+                        containsString("access_token"),
+                        containsString("HttpOnly"),
+                        containsString("Secure"),
+                        containsString("SameSite=Strict")
+                )));
     }
 
 }

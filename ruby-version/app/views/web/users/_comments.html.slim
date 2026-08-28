@@ -1,9 +1,0 @@
-- if comments.empty?
-  = render 'profile_empty_list', text: t('.not_comments')
-- else
-  - comments.each do |comment|
-    .card.mb-3
-      .card-header
-        = link_to comment.resume, resume_path(comment.resume)
-      .card-body
-        .card-text.hexlet-cv-content == markdown2html comment.content
