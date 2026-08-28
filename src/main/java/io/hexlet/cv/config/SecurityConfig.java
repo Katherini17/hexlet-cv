@@ -1,6 +1,8 @@
 package io.hexlet.cv.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hexlet.cv.service.CustomUserDetailsService;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -26,7 +29,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -40,7 +45,8 @@ public class SecurityConfig {
     SecurityFilterChain security(HttpSecurity http,
                                  JwtDecoder jwtDecoder,
                                  BearerTokenResolver cookieTokenResolver,
-                                 Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthConverter)
+                                 Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthConverter,
+                                 AuthenticationEntryPoint jsonAuthEntryPoint)
             throws Exception {
         http
                 .cors(Customizer.withDefaults())
@@ -55,11 +61,45 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(rs -> rs
                         .bearerTokenResolver(cookieTokenResolver)
+                        .authenticationEntryPoint(jsonAuthEntryPoint)
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthConverter)
+                        ))
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.deny())
+                        .referrerPolicy(referrer -> referrer
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
+                        .permissionsPolicyHeader(permissions -> permissions
+                                .policy("geolocation=(), camera=(), microphone=()"))
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .maxAgeInSeconds(31536000)
+                                .includeSubDomains(true))
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives(
+                                        "default-src 'self'; "
+                                                + "script-src 'self'; "
+                                                + "style-src 'self' 'unsafe-inline'; "
+                                                + "img-src 'self' data:; "
+                                                + "font-src 'self'; "
+                                                + "connect-src 'self'; "
+                                                + "frame-ancestors 'none'; "
+                                                + "base-uri 'self'; "
+                                                + "form-action 'self'; "
+                                                + "object-src 'none'"
+                                )
                         ));
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint jsonAuthEntryPoint(ObjectMapper om) {
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            var body = Map.of("errors", Map.of("auth", "Authentication required or token invalid"));
+            response.getWriter().write(om.writeValueAsString(body));
+        };
     }
 
     @Bean

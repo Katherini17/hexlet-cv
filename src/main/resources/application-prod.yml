@@ -16,9 +16,16 @@ app:
         httpOnly: true
         secure: true
         sameSite: Strict
-        maxAgeSeconds: 900       # 15 минут
+        path: /
+        maxAgeSeconds: 900
       refresh:
         httpOnly: true
         secure: true
         sameSite: Lax
-        maxAgeSeconds: 2592000   # 30 дней
+        path: /
+        maxAgeSeconds: 2592000
+    jwt:
+      access-token-validity-seconds: 900
+      refresh-token-validity-seconds: 2592000
+      issuer: hexlet-cv
+      audience: hexlet-cv-frontend
