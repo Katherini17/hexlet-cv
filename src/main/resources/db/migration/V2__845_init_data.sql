@@ -1,3 +1,5 @@
+-- issue #845
+
 -- users
 -- Пароль seed-пользователей: qweqweqwe
 -- Хранится в виде BCrypt-хэша, сгенерированного BCryptPasswordEncoder
@@ -17,21 +19,6 @@ VALUES
      '$2a$10$5ZcF/IRoH4X1gicCg.Be9OWt7eDHkY.SSy42D0XWjpwumbAeCv00S',
      1, CURRENT_TIMESTAMP, '127.0.0.1', 'ADMIN', 'active', 'ru',
      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-
--- newsletter_settings
-INSERT INTO newsletter_settings (id, user_id, new_courses, course_updates, promotions,
-                                 achievements, comments_replies, resume_views,
-                                 vacancy_matches, community_news, marketing_tips,
-                                 created_at, updated_at)
-VALUES
-    (1, 1, true, true, false, true, true, true, true, false, false,
-     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (2, 2, true, true, false, true, true, true, true, false, false,
-     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (3, 3, true, true, true, true, true, true, true, true, false,
-     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 
 -- resumes
 INSERT INTO resumes (id, user_id, name, state, answers_count, locale, city,
@@ -202,7 +189,6 @@ VALUES
 
 -- Синхронизация identity-колонок после вставки фиксированных ID.
 ALTER TABLE users ALTER COLUMN id RESTART WITH 4;
-ALTER TABLE newsletter_settings ALTER COLUMN id RESTART WITH 4;
 
 ALTER TABLE resumes ALTER COLUMN id RESTART WITH 3;
 ALTER TABLE resume_works ALTER COLUMN id RESTART WITH 3;
