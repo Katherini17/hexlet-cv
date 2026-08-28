@@ -20,7 +20,7 @@ import io.hexlet.cv.model.User;
 import io.hexlet.cv.model.enums.RoleType;
 import io.hexlet.cv.repository.UserRepository;
 import io.hexlet.cv.security.TokenService;
-import io.hexlet.cv.util.JWTUtils;
+import io.hexlet.cv.support.TokenTestHelper;
 import jakarta.servlet.http.Cookie;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +86,7 @@ class AuditLoggingTest extends AuditLogCaptureSupport {
     private GlobalExceptionHandler globalExceptionHandler;
 
     @Autowired
-    private JWTUtils jwtUtils;
+    private TokenTestHelper tokenHelper;
 
     @MockitoSpyBean
     private TokenService tokenService;
@@ -155,7 +155,7 @@ class AuditLoggingTest extends AuditLogCaptureSupport {
     void shouldLogSuccessfulLogout() throws Exception {
         mockMvc.perform(post("/users/sign_out")
                         .with(candidateJwt())
-                        .cookie(new Cookie("refresh_token", jwtUtils.generateRefreshToken(USER_EMAIL))))
+                        .cookie(new Cookie("refresh_token", tokenHelper.refreshToken(USER_EMAIL, PASSWORD))))
                 .andExpect(status().isFound());
 
         assertThat(auditFields(singleAuditEvent()))
@@ -180,7 +180,7 @@ class AuditLoggingTest extends AuditLogCaptureSupport {
     @Test
     void shouldLogSuccessfulTokenRefresh() throws Exception {
         mockMvc.perform(post("/api/auth/refresh")
-                        .cookie(new Cookie("refresh_token", jwtUtils.generateRefreshToken(USER_EMAIL))))
+                        .cookie(new Cookie("refresh_token", tokenHelper.refreshToken(USER_EMAIL, PASSWORD))))
                 .andExpect(status().isNoContent());
 
         assertThat(auditFields(singleAuditEvent()))

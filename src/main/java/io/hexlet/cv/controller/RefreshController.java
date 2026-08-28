@@ -43,6 +43,9 @@ public class RefreshController {
             auditLogger.logSuccess(AuditEventType.TOKEN_REFRESH, refreshed.subject(), request);
             return ResponseEntity.noContent().build();
         } catch (BadCredentialsException e) {
+            var expired = tokenCookieService.buildExpiredCookies();
+            response.addHeader(HttpHeaders.SET_COOKIE, expired.access().toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, expired.refresh().toString());
             auditLogger.logFailure(AuditEventType.TOKEN_REFRESH, subject, AuditReason.TOKEN_INVALID, request);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

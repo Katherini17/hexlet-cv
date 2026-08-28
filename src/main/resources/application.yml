@@ -66,6 +66,9 @@ app:
       refresh-token-validity-seconds: 2592000   # 30 дней
       issuer: hexlet-cv
       audience: hexlet-cv-frontend
+      enforce-session-claims: false             # → true через 30 дней после релиза, см. раздел 5
+      refresh-race-grace-seconds: 0             # >0 — не казнить семейство при гонке, см. 3.5
+      cleanup-cron: "0 17 3 * * *"
 
 logging:
   level:

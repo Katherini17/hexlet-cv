@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import io.hexlet.cv.model.User;
 import io.hexlet.cv.model.enums.RoleType;
 import io.hexlet.cv.repository.UserRepository;
-import io.hexlet.cv.util.JWTUtils;
+import io.hexlet.cv.support.TokenTestHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ class EncodersConfigTest {
     private JwtDecoder refreshTokenDecoder;
 
     @Autowired
-    private JWTUtils jwtUtils;
+    private TokenTestHelper tokenHelper;
 
     @Autowired
     private UserRepository userRepository;
@@ -48,19 +48,19 @@ class EncodersConfigTest {
 
     @Test
     void accessDecoderRejectsRefreshToken() {
-        String refreshToken = jwtUtils.generateRefreshToken("test@gmail.com");
+        String refreshToken = tokenHelper.refreshToken("test@gmail.com", "test_password");
         assertThrows(JwtException.class, () -> jwtDecoder.decode(refreshToken));
     }
 
     @Test
     void refreshDecoderRejectsAccessToken() {
-        String accessToken = jwtUtils.generateAccessToken("test@gmail.com");
+        String accessToken = tokenHelper.accessToken("test@gmail.com", "test_password");
         assertThrows(JwtException.class, () -> refreshTokenDecoder.decode(accessToken));
     }
 
     @Test
     void refreshDecoderAcceptsMatchingRefreshToken() {
-        String refreshToken = jwtUtils.generateRefreshToken("test@gmail.com");
+        String refreshToken = tokenHelper.refreshToken("test@gmail.com", "test_password");
         assertDoesNotThrow(() -> refreshTokenDecoder.decode(refreshToken));
     }
 }

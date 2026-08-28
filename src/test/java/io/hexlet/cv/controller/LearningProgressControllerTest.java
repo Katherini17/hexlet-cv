@@ -16,7 +16,7 @@
     import io.hexlet.cv.repository.UserLessonProgressRepository;
     import io.hexlet.cv.repository.UserProgramProgressRepository;
     import io.hexlet.cv.repository.UserRepository;
-    import io.hexlet.cv.util.JWTUtils;
+    import io.hexlet.cv.support.TokenTestHelper;
     import jakarta.servlet.http.Cookie;
     import java.time.LocalDateTime;
     import java.util.Optional;
@@ -42,7 +42,7 @@
         private UserRepository userRepository;
 
         @Autowired
-        private JWTUtils jwtUtils;
+        private TokenTestHelper tokenHelper;
 
         @Autowired
         private BCryptPasswordEncoder passwordEncoder;
@@ -78,7 +78,7 @@
         }
 
         private String generateToken(User user) {
-            return jwtUtils.generateAccessToken(user.getEmail());
+            return tokenHelper.accessToken(user.getEmail(), "password");
         }
 
         private Program createProgram(String titlePrefix) {
