@@ -4,6 +4,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 import io.hexlet.cv.model.converter.RoleTypeConverter;
 import io.hexlet.cv.model.enums.RoleType;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -81,6 +82,10 @@ public class User implements UserDetails {
     private String state;
 
     private String locale;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private long tokenVersion = 0L;
 
     @CreatedDate
     private LocalDateTime createdAt;

@@ -1,8 +1,0 @@
-javascript:
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments)};
-  gtag('js', new Date());
-
-  gtag('config', gon.google_analytics_key);
-
-= javascript_include_tag "https://www.googletagmanager.com/gtag/js?id=##{Rails.application.config.vars[:ga]}}", async: true

@@ -1,3 +1,0 @@
----
-BUNDLE_JOBS: "8"
-BUNDLE_WITHOUT: "production"

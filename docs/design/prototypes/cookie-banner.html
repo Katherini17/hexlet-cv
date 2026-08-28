@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Хекслет Карьера — согласие на cookie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Токены — из site.dc.html, чтобы баннер не выбивался из языка сайта. */
+  :root {
+    --brand: #116EF5;
+    --brand-dark: #0B5CD6;
+    --ink: #17171E;
+    --text: #4A4F59;
+    --muted: #6A6F7A;
+    --surface: #F4F5F7;
+    --border: #E6E8EC;
+    --border-strong: #D5D9E0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 24px 80px;
+    background: var(--surface);
+    font: 400 14px/1.6 Manrope, system-ui, sans-serif;
+    color: var(--ink);
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.6px; margin: 0 0 6px; }
+  .lead { font-size: 13.5px; color: var(--muted); margin: 0 0 32px; }
+  h2 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 32px 0 12px; }
+  .note { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
+
+  /* Кадр: имитирует окно браузера, баннер прижат к его низу. */
+  .frame {
+    position: relative;
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(23, 23, 30, .10);
+    overflow: hidden;
+  }
+  .frame-desktop { height: 320px; }
+  .frame-mobile { width: 375px; height: 480px; }
+  .frame-body { padding: 20px 24px; color: #C9CDD4; font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+
+  /* Полоса согласия. */
+  .bar {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: #FFFFFF;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 28px rgba(23, 23, 30, .08);
+  }
+  .bar-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .bar-text { font-size: 13.5px; line-height: 1.6; color: var(--text); flex: 1; margin: 0; }
+  .bar-text a { color: var(--brand-dark); font-weight: 600; text-decoration: none; }
+  .actions { display: flex; gap: 10px; flex: none; }
+
+  .btn {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 9px;
+    font: 700 14px Manrope, system-ui, sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--brand); color: #FFFFFF; }
+  .btn-primary:hover { background: var(--brand-dark); }
+  .btn-secondary { background: #FFFFFF; color: var(--ink); border-color: var(--border-strong); }
+  .btn-secondary:hover { background: var(--surface); }
+
+  /* Мобильный вариант: текст сверху, кнопки в строку на всю ширину. */
+  .frame-mobile .bar-inner { flex-direction: column; align-items: stretch; gap: 14px; padding: 16px; }
+  .frame-mobile .actions { gap: 8px; }
+  .frame-mobile .btn { flex: 1; padding: 0 12px; font-size: 13.5px; }
+
+  /* Ссылка отзыва согласия в футере. */
+  .footer {
+    background: var(--ink);
+    border-radius: 14px;
+    padding: 20px 24px;
+    display: flex;
+    gap: 40px;
+  }
+  .footer-col-title { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #5F6472; margin-bottom: 12px; }
+  .footer a, .footer span { display: block; font-size: 13px; font-weight: 600; color: #B9BECC; text-decoration: none; margin-bottom: 8px; }
+  .footer .highlight { color: #FFFFFF; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .4); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Согласие на cookie</h1>
+  <p class="lead">Полоса внизу страницы. Показывается один раз до выбора, дальше не появляется. Категорий и настроек нет: необязательная обработка на сайте одна — аналитика.</p>
+
+  <h2>Десктоп</h2>
+  <div class="frame frame-desktop">
+    <div class="frame-body">Страница сайта</div>
+    <div class="bar">
+      <div class="bar-inner">
+        <p class="bar-text">
+          Мы используем cookie. Технические нужны, чтобы сайт работал, — без них не обойтись. Аналитические помогают понять, как вы пользуетесь сервисом, и включаются только с вашего согласия. Что и зачем собираем — в <a href="#">правовой информации</a>.
+        </p>
+        <div class="actions">
+          <span class="btn btn-secondary">Только необходимые</span>
+          <span class="btn btn-primary">Принять</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Обе кнопки на первом экране и равнодоступны: отказ нельзя прятать в настройки. Крестика нет — баннер закрывается только выбором.</p>
+
+  <h2>Мобильный (375)</h2>
+  <div class="frame frame-mobile">
+    <div class="frame-body">Страница сайта</div>
+    <div class="bar">
+      <div class="bar-inner">
+        <p class="bar-text">
+          Мы используем cookie. Технические — чтобы сайт работал, аналитические — только с вашего согласия. Подробнее в <a href="#">правовой информации</a>.
+        </p>
+        <div class="actions">
+          <span class="btn btn-secondary">Только необходимые</span>
+          <span class="btn btn-primary">Принять</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">На мобильном текст короче, кнопки делят строку пополам. Порядок кнопок тот же.</p>
+
+  <h2>Отзыв согласия — ссылка в футере</h2>
+  <div class="footer">
+    <div>
+      <div class="footer-col-title">Документы</div>
+      <a href="#">Правовая информация</a>
+      <a href="#">Персональные данные</a>
+      <a href="#">Оферта</a>
+      <a href="#" class="highlight">Настройки cookie</a>
+      <a href="#">careers@hexlet.io</a>
+    </div>
+  </div>
+  <p class="note">Клик по «Настройки cookie» показывает ту же полосу снова — отдельного экрана настроек не нужно. Так пользователь в любой момент меняет решение, а мы не рисуем ещё один интерфейс.</p>
+</div>
+</body>
+</html>

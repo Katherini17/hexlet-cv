@@ -1,7 +1,0 @@
-- content_for :header do
-  = t('.header')
-
-= simple_form_for current_user, url: account_newsletters_path do |f|
-  .mb-3
-    = f.input :resume_mail_enabled, class: 'form-check-input'
-  = f.button :submit, class: 'btn-primary'

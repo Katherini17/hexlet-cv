@@ -27,10 +27,7 @@ public class LoginController {
     private final Inertia inertia;
     private final LoginService loginService;
     private final TokenService tokenService;
-    //   private final AuthResponseService authResponseService;
     private final FlashPropsService flashPropsService;
-
-
     private final TokenCookieService tokenCookieService;
 
     @GetMapping("/users/sign_in")
@@ -52,16 +49,13 @@ public class LoginController {
                 loginDTO.getPassword()
         );
 
-        var access = tokenCookieService.buildAccessCookie(tokens.access());
-        var refresh = tokenCookieService.buildRefreshCookie(tokens.refresh());
+        var cookies = tokenCookieService.buildCookies(tokens);
 
-        response.addHeader(HttpHeaders.SET_COOKIE, access.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refresh.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookies.access().toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookies.refresh().toString());
 
         session.setAttribute("flash", Map.of("success", true));
 
         return inertia.redirect("/dashboard");
-
-        //  return authResponseService.success(locale, tokens, response);
     }
 }

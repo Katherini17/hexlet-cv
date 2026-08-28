@@ -4,6 +4,7 @@
 
 - `screens/` — скриншоты всех экранов (сняты из прототипов), вставляются в issue.
 - `annotated/` — 3 кадра с ручными пометками дизайнера.
+- `prototypes/cookie-banner.html` — обычная HTML-страница, а не dc-канвас: маленький кадр, добавленный вне Claude Design. Открывается в браузере так же.
 - Дорожная карта: майлстоуны M1–M7, эпики [#1119](https://github.com/hexlet-volunteers/hexlet-cv/issues/1119)–[#1132](https://github.com/hexlet-volunteers/hexlet-cv/issues/1132).
 
 ## Карта: экран → файл → issue
@@ -51,6 +52,7 @@
 | Правовая информация | `screens/site-legal.png` | #1140 |
 | Блог — список | `screens/site-blog.png` | #1199, #1198 |
 | Блог — статья | `screens/site-blog-article.png` | #1200 |
+| Согласие на cookie | `prototypes/cookie-banner.html` | #1238 |
 
 ### Админка (`admin.dc.html`)
 
