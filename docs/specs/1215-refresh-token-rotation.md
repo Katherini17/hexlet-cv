@@ -16,15 +16,15 @@
 
 | Подпункт #1215 | Статус | Где |
 |---|---|---|
-| Cookie: `HttpOnly`, `Secure`, `SameSite` | ✅ сделано | [CookieProperties.java](../src/main/java/io/hexlet/cv/config/CookieProperties.java), [application.yml:41-52](../src/main/resources/application.yml#L41-L52) |
-| Cookie: ограниченный `Path` | ❌ **не сделано** | `path: /` у обеих cookie — [application-prod.yml:19](../src/main/resources/application-prod.yml#L19), [:25](../src/main/resources/application-prod.yml#L25). См. 9.4 |
-| Короткий TTL access-токена | ✅ сделано | 900 с — [application.yml:53](../src/main/resources/application.yml#L53) |
+| Cookie: `HttpOnly`, `Secure`, `SameSite` | ✅ сделано | [CookieProperties.java](../../src/main/java/io/hexlet/cv/config/CookieProperties.java), [application.yml:41-52](../../src/main/resources/application.yml#L41-L52) |
+| Cookie: ограниченный `Path` | ❌ **не сделано** | `path: /` у обеих cookie — [application-prod.yml:19](../../src/main/resources/application-prod.yml#L19), [:25](../../src/main/resources/application-prod.yml#L25). См. 9.4 |
+| Короткий TTL access-токена | ✅ сделано | 900 с — [application.yml:53](../../src/main/resources/application.yml#L53) |
 | **Ротация refresh-токена** | ❌ **не сделано** | предмет этого документа |
 | Отзыв при logout | ⚠️ частично | работает, но глобально: выкидывает со всех устройств |
-| Отзыв при смене пароля | ⛔ **невозможно** | флоу смены пароля не существует: `CustomUserDetailsService.changePassword` — заглушка `UnsupportedOperationException` ([CustomUserDetailsService.java:39-41](../src/main/java/io/hexlet/cv/service/CustomUserDetailsService.java#L39-L41)). См. 10.1 |
+| Отзыв при смене пароля | ⛔ **невозможно** | флоу смены пароля не существует: `CustomUserDetailsService.changePassword` — заглушка `UnsupportedOperationException` ([CustomUserDetailsService.java:39-41](../../src/main/java/io/hexlet/cv/service/CustomUserDetailsService.java#L39-L41)). См. 10.1 |
 | Подпись ключом из секрета, не хардкод | ✅ сделано | RSA из файла, путь через env; `certs/` и `*.pem` в `.gitignore` (проверил `git ls-files` — ключей в репозитории нет) |
 | Алгоритм фиксирован | ✅ сделано | `NimbusJwtDecoder.withPublicKey(...)` — RS256, `alg` из заголовка не выбирается |
-| Проверка `exp`/`iss`/`aud` | ✅ сделано | [EncodersConfig.java:94-102](../src/main/java/io/hexlet/cv/config/EncodersConfig.java#L94-L102) + `JwtValidators.createDefault()` |
+| Проверка `exp`/`iss`/`aud` | ✅ сделано | [EncodersConfig.java:94-102](../../src/main/java/io/hexlet/cv/config/EncodersConfig.java#L94-L102) + `JwtValidators.createDefault()` |
 
 **Вывод:** этот PR закрывает «ротацию» и переводит «отзыв при logout» из глобального в per-session. Два подпункта (`Path` и смена пароля) остаются открытыми — см. раздел 10.
 
@@ -34,11 +34,11 @@
 
 Ревьюер прав по всем трём следствиям. Подтверждаю построчно.
 
-**Ротация без отзыва** — [TokenService.java:30-42](../src/main/java/io/hexlet/cv/security/TokenService.java#L30-L42): декодирование, затем сразу выдача новой пары. Предъявленный токен нигде не помечается использованным.
+**Ротация без отзыва** — [TokenService.java:30-42](../../src/main/java/io/hexlet/cv/security/TokenService.java#L30-L42): декодирование, затем сразу выдача новой пары. Предъявленный токен нигде не помечается использованным.
 
-**Единственный механизм отзыва — глобальный** — `incrementTokenVersion` ([UserRepository.java:15-17](../src/main/java/io/hexlet/cv/repository/UserRepository.java#L15-L17)) инкрементит одно поле `User.tokenVersion`, вызывается только из `revokeByRefreshToken` (логаут).
+**Единственный механизм отзыва — глобальный** — `incrementTokenVersion` ([UserRepository.java:15-17](../../src/main/java/io/hexlet/cv/repository/UserRepository.java#L15-L17)) инкрементит одно поле `User.tokenVersion`, вызывается только из `revokeByRefreshToken` (логаут).
 
-**`jti` в токене нет** — [JWTUtils.java:43-56](../src/main/java/io/hexlet/cv/util/JWTUtils.java#L43-L56) кладёт `type`, `tokenVersion`, `iss/aud/sub/exp/iat`. Уникального идентификатора нет, значит сервер не может отличить первое предъявление токена от повторного.
+**`jti` в токене нет** — [JWTUtils.java:43-56](../../src/main/java/io/hexlet/cv/util/JWTUtils.java#L43-L56) кладёт `type`, `tokenVersion`, `iss/aud/sub/exp/iat`. Уникального идентификатора нет, значит сервер не может отличить первое предъявление токена от повторного.
 
 Следствия ровно те, что описал ревьюер: украденная cookie работает все 30 дней, повторное использование не детектится, окно жизни украденного токена не сужается. Плюс `tokenVersion` — один на пользователя, поэтому «погасить только эту сессию» текущей схемой не выражается.
 
@@ -65,7 +65,7 @@
 
 Состояние строки хранится как `Instant revokedAt` (`null` = активна), а не как `enum Status { ACTIVE, REVOKED }`. Три причины:
 
-1. **Нет проблемы enum-литералов в JPQL.** `update ... set t.status = 'REVOKED'` — это поведение, за которое приходится ручаться версией Hibernate (у нас 6.6 через Boot 3.5.0, [libs.versions.toml:18](../gradle/libs.versions.toml#L18)). `where t.revokedAt is null` работает при любой версии и в любой СУБД, а у нас их две — H2 в dev/test и PostgreSQL в prod.
+1. **Нет проблемы enum-литералов в JPQL.** `update ... set t.status = 'REVOKED'` — это поведение, за которое приходится ручаться версией Hibernate (у нас 6.6 через Boot 3.5.0, [libs.versions.toml:18](../../gradle/libs.versions.toml#L18)). `where t.revokedAt is null` работает при любой версии и в любой СУБД, а у нас их две — H2 в dev/test и PostgreSQL в prod.
 2. **Время отзыва получается бесплатно**, а оно нужно и для аудита (#1223), и для отсечки гонок (3.5).
 3. Enum из двух значений с гарантией «обратно не переходим» — это и есть nullable timestamp, только дороже в описании.
 
@@ -75,7 +75,7 @@
 
 Без этого **после logout access-токен живёт до 15 минут** — таблица `refresh_tokens` про access-токены ничего не знает.
 
-Сейчас такой дыры нет: logout инкрементит `tokenVersion`, а валидатор `tokenVersionValid()` навешен и на access-декодер, и на refresh-декодер ([EncodersConfig.java:50-61](../src/main/java/io/hexlet/cv/config/EncodersConfig.java#L50-L61)). То есть logout мгновенно убивает оба токена. Если при переходе на per-session отзыв просто заменить инкремент `tokenVersion` на отзыв семейства, мы **потеряем** синхронную инвалидацию access-токена. Это был бы регресс безопасности, привнесённый улучшением безопасности.
+Сейчас такой дыры нет: logout инкрементит `tokenVersion`, а валидатор `tokenVersionValid()` навешен и на access-декодер, и на refresh-декодер ([EncodersConfig.java:50-61](../../src/main/java/io/hexlet/cv/config/EncodersConfig.java#L50-L61)). То есть logout мгновенно убивает оба токена. Если при переходе на per-session отзыв просто заменить инкремент `tokenVersion` на отзыв семейства, мы **потеряем** синхронную инвалидацию access-токена. Это был бы регресс безопасности, привнесённый улучшением безопасности.
 
 Возражение «JWT stateless, не будем ходить в БД на каждый запрос» здесь неприменимо: **`tokenVersionValid()` уже делает `findByEmail` на каждый запрос** — за поход в БД давно заплачено. Причём заплачено дороже, чем нужно: `findByEmail` поднимает всю сущность `User` ради сравнения одного числа.
 
@@ -85,7 +85,7 @@
 - детект кражи гасит семейство вместе с его access-токенами — реакция мгновенная, а не «через 15 минут»;
 - `tokenVersion` остаётся чистым глобальным kill switch.
 
-Важная деталь про стоимость: `cookieTokenResolver` ([SecurityConfig.java:134-147](../src/main/java/io/hexlet/cv/config/SecurityConfig.java#L134-L147)) отдаёт `access_token` из cookie на **любом** запросе, где эта cookie есть — включая `permitAll`-маршруты. Значит валидатор выполняется на всём трафике аутентифицированного пользователя, не только на `/account/**`. Именно поэтому важно, что запрос остался один, а не стало два.
+Важная деталь про стоимость: `cookieTokenResolver` ([SecurityConfig.java:134-147](../../src/main/java/io/hexlet/cv/config/SecurityConfig.java#L134-L147)) отдаёт `access_token` из cookie на **любом** запросе, где эта cookie есть — включая `permitAll`-маршруты. Значит валидатор выполняется на всём трафике аутентифицированного пользователя, не только на `/account/**`. Именно поэтому важно, что запрос остался один, а не стало два.
 
 ### 3.5 Гонки честного клиента
 
@@ -427,8 +427,8 @@ private JwtClaimsSet.Builder baseClaims(User user, long validitySeconds) {
 
 **Зачем что:**
 
-- **Принимаем `User`, а не `String username`.** Сейчас каждый генератор сам делает `findByEmail` ([JWTUtils.java:29](../src/main/java/io/hexlet/cv/util/JWTUtils.java#L29), [:44](../src/main/java/io/hexlet/cv/util/JWTUtils.java#L44)). На один refresh это два одинаковых запроса, а с записью в `refresh_tokens` понадобится ещё и `user.getId()` — стало бы три. `TokenService` грузит пользователя один раз и передаёт вниз.
-- **Старые перегрузки `generateAccessToken(String)` / `generateRefreshToken(String)` удалить, а не оставить «для совместимости».** Пока живёт перегрузка без `familyId`, любой новый вызов молча выпустит токен, который не проходит проверку семейства, — то есть тихо сломает авторизацию в рантайме. Компилятор должен на это ругаться. Правки затронут 16 вызовов в тестах ([ArticleControllerTest](../src/test/java/io/hexlet/cv/controller/ArticleControllerTest.java), [TeamControllerTest](../src/test/java/io/hexlet/cv/controller/TeamControllerTest.java), [EncodersConfigTest](../src/test/java/io/hexlet/cv/config/EncodersConfigTest.java) и др.) — заводим тестовый хелпер, выдающий пару через `TokenService`.
+- **Принимаем `User`, а не `String username`.** Сейчас каждый генератор сам делает `findByEmail` ([JWTUtils.java:29](../../src/main/java/io/hexlet/cv/util/JWTUtils.java#L29), [:44](../../src/main/java/io/hexlet/cv/util/JWTUtils.java#L44)). На один refresh это два одинаковых запроса, а с записью в `refresh_tokens` понадобится ещё и `user.getId()` — стало бы три. `TokenService` грузит пользователя один раз и передаёт вниз.
+- **Старые перегрузки `generateAccessToken(String)` / `generateRefreshToken(String)` удалить, а не оставить «для совместимости».** Пока живёт перегрузка без `familyId`, любой новый вызов молча выпустит токен, который не проходит проверку семейства, — то есть тихо сломает авторизацию в рантайме. Компилятор должен на это ругаться. Правки затронут 16 вызовов в тестах ([ArticleControllerTest](../../src/test/java/io/hexlet/cv/controller/ArticleControllerTest.java), [TeamControllerTest](../../src/test/java/io/hexlet/cv/controller/TeamControllerTest.java), [EncodersConfigTest](../../src/test/java/io/hexlet/cv/config/EncodersConfigTest.java) и др.) — заводим тестовый хелпер, выдающий пару через `TokenService`.
 - **Один `Instant.now()` на токен**, в `baseClaims`. `iat` и `exp` должны считаться от одного чтения часов.
 - **Константы вместо строковых литералов.** `"familyId"` появляется в четырёх файлах — генераторе, двух валидаторах и `TokenService`. Опечатка в одном из них даёт не ошибку компиляции, а тихо неработающую проверку сессии.
 
@@ -621,7 +621,7 @@ public class TokenService {
 
 **Зачем что:**
 
-- **`parseUuidOrNull`, а не `UUID.fromString` напрямую.** Это критично. У пользователей на руках refresh-cookie **без** `jti` и `familyId` — maxAge 30 дней ([application.yml:52](../src/main/resources/application.yml#L52)). Прямой `UUID.fromString(jwt.getId())` дал бы `NullPointerException`, а `RefreshController` ловит только `BadCredentialsException` ([RefreshController.java:34](../src/main/java/io/hexlet/cv/controller/RefreshController.java#L34)) — значит **500 вместо 401 на легитимном трафике первые 30 дней после релиза.** Отдельно от `null` надо ловить и `IllegalArgumentException` — на непустой, но битый UUID в claim.
+- **`parseUuidOrNull`, а не `UUID.fromString` напрямую.** Это критично. У пользователей на руках refresh-cookie **без** `jti` и `familyId` — maxAge 30 дней ([application.yml:52](../../src/main/resources/application.yml#L52)). Прямой `UUID.fromString(jwt.getId())` дал бы `NullPointerException`, а `RefreshController` ловит только `BadCredentialsException` ([RefreshController.java:34](../../src/main/java/io/hexlet/cv/controller/RefreshController.java#L34)) — значит **500 вместо 401 на легитимном трафике первые 30 дней после релиза.** Отдельно от `null` надо ловить и `IllegalArgumentException` — на непустой, но битый UUID в claim.
 - **`requireUser` бросает `BadCredentialsException`, а не `orElseThrow()`.** Голый `orElseThrow()` даёт `NoSuchElementException` → 500. А случай реальный: удалённый пользователь с живой cookie.
 - **`authenticateAndGenerate` без `@Transactional`.** Заворачивать `authenticationManager.authenticate()` в транзакцию значило бы держать соединение с БД всё время проверки bcrypt (~100 мс на запрос логина).
 - **Один `Instant now` на всю операцию**, прокинутый в `issue()` и `rotate()`. Момент отзыва предшественника и момент выдачи преемника должны совпадать — иначе в цепочке аудита появятся необъяснимые микрозазоры.
@@ -853,7 +853,7 @@ public class RefreshTokenCleanupJob {
 
 **7.11 Джоб очистки** удаляет просроченные строки и не трогает активные.
 
-Тесты 7.1–7.5 писать в стиле существующего [RefreshControllerTest](../src/test/java/io/hexlet/cv/controller/RefreshControllerTest.java) — через `MockMvc` и cookie, **не на моках репозитория**. Дефект из 4.3 — это поведение транзакции; на моках он невидим, тест будет зелёным на сломанном коде.
+Тесты 7.1–7.5 писать в стиле существующего [RefreshControllerTest](../../src/test/java/io/hexlet/cv/controller/RefreshControllerTest.java) — через `MockMvc` и cookie, **не на моках репозитория**. Дефект из 4.3 — это поведение транзакции; на моках он невидим, тест будет зелёным на сломанном коде.
 
 ---
 
@@ -882,7 +882,7 @@ public class RefreshTokenCleanupJob {
 
 ### 9.1 Невалидная access-cookie даёт 401 на публичных страницах — и баг уже в проде
 
-`cookieTokenResolver` ([SecurityConfig.java:134-147](../src/main/java/io/hexlet/cv/config/SecurityConfig.java#L134-L147)) отдаёт `access_token` из cookie на **каждом** запросе, где cookie присутствует, независимо от того, требует ли маршрут авторизации. В Spring Security ошибка аутентификации короткозамыкает цепочку **до** проверки авторизации — то есть невалидный токен даёт 401 даже там, где стоит `permitAll()` ([SecurityConfig.java:57](../src/main/java/io/hexlet/cv/config/SecurityConfig.java#L57)).
+`cookieTokenResolver` ([SecurityConfig.java:134-147](../../src/main/java/io/hexlet/cv/config/SecurityConfig.java#L134-L147)) отдаёт `access_token` из cookie на **каждом** запросе, где cookie присутствует, независимо от того, требует ли маршрут авторизации. В Spring Security ошибка аутентификации короткозамыкает цепочку **до** проверки авторизации — то есть невалидный токен даёт 401 даже там, где стоит `permitAll()` ([SecurityConfig.java:57](../../src/main/java/io/hexlet/cv/config/SecurityConfig.java#L57)).
 
 Это воспроизводится **уже сейчас**, без всяких правок: пользователь разлогинился на другом устройстве → `tokenVersion` инкрементнулся → его access-cookie стала невалидной → **весь публичный сайт отвечает 401**, пока cookie не истечёт. Для Inertia-приложения, где публичные страницы — это основная часть, это заметно.
 
@@ -898,7 +898,7 @@ public class RefreshTokenCleanupJob {
 
 ### 9.4 `Path` у cookie — незакрытый подпункт той же задачи #1215
 
-В задаче написано «ограниченный Path», в конфиге у обеих cookie `path: /` ([application-prod.yml:19](../src/main/resources/application-prod.yml#L19), [:25](../src/main/resources/application-prod.yml#L25)). Refresh-токен уходит на сервер при каждом запросе к сайту, хотя нужен ровно двум эндпоинтам — `/api/auth/refresh` и `/users/sign_out`.
+В задаче написано «ограниченный Path», в конфиге у обеих cookie `path: /` ([application-prod.yml:19](../../src/main/resources/application-prod.yml#L19), [:25](../../src/main/resources/application-prod.yml#L25)). Refresh-токен уходит на сервер при каждом запросе к сайту, хотя нужен ровно двум эндпоинтам — `/api/auth/refresh` и `/users/sign_out`.
 
 Это ослабляет всё остальное: чем чаще refresh-токен ходит по сети, тем больше поверхность его утечки, а именно его утечку мы этим PR и пытаемся обнаруживать. Мешает сделать сразу то, что эндпоинты живут под разными префиксами — logout пришлось бы перенести под `/api/auth/`. Отдельная задача, но её стоит связать с #1215, потому что подпункт формально не закрыт.
 
@@ -920,13 +920,13 @@ public class RefreshTokenCleanupJob {
 
 ### 10.1 Отзыв при смене пароля — закрыть нельзя
 
-Задача требует отзыва при смене пароля, но флоу смены пароля в проекте нет: `CustomUserDetailsService.changePassword` — заглушка, бросающая `UnsupportedOperationException` ([CustomUserDetailsService.java:39-41](../src/main/java/io/hexlet/cv/service/CustomUserDetailsService.java#L39-L41)). Поля `resetPasswordToken` / `resetPasswordSentAt` в `User` есть ([User.java:55-56](../src/main/java/io/hexlet/cv/model/User.java#L55-L56)), то есть флоу планировался, но не реализован.
+Задача требует отзыва при смене пароля, но флоу смены пароля в проекте нет: `CustomUserDetailsService.changePassword` — заглушка, бросающая `UnsupportedOperationException` ([CustomUserDetailsService.java:39-41](../../src/main/java/io/hexlet/cv/service/CustomUserDetailsService.java#L39-L41)). Поля `resetPasswordToken` / `resetPasswordSentAt` в `User` есть ([User.java:55-56](../../src/main/java/io/hexlet/cv/model/User.java#L55-L56)), то есть флоу планировался, но не реализован.
 
 Честная позиция: `revokeAllSessions(userId)` в этом PR — **подготовленный крючок без вызова**. Это стоит назвать вслух в описании PR (иначе прилетит и от ревьюера, и от SonarQube как неиспользуемый метод), а подпункт #1215 оставить открытым со ссылкой на задачу про смену пароля. Когда флоу появится, вызов будет одной строкой — но приписывать себе закрытие пункта до этого нельзя.
 
 ### 10.2 Миграции схемы
 
-`ddl-auto: update` ([application.yml:26](../src/main/resources/application.yml#L26)) для MVP приемлем, и `refresh_tokens` через него накатится. Но это уже **вторая** таблица, заезжающая так, и у неё три индекса и FK, которого нет (4.1). `ddl-auto: update` **не удаляет и не изменяет** существующие колонки и индексы — значит первая же правка схемы придёт руками по прод-базе.
+`ddl-auto: update` ([application.yml:26](../../src/main/resources/application.yml#L26)) для MVP приемлем, и `refresh_tokens` через него накатится. Но это уже **вторая** таблица, заезжающая так, и у неё три индекса и FK, которого нет (4.1). `ddl-auto: update` **не удаляет и не изменяет** существующие колонки и индексы — значит первая же правка схемы придёт руками по прод-базе.
 
 Flyway или Liquibase надо ставить в план на ближайший спринт, а не «в бэклог». Первая миграция: FK `refresh_tokens.user_id → users.id ON DELETE CASCADE`.
 
