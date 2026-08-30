@@ -12,10 +12,11 @@ public class LoginRequestDTO {
 
     @NotBlank(message = "{email.notBlank}")
     @Email(message = "{email.invalid}")
+    @Size(max = 255, message = "{email.maxSize}")
     private String email;
 
     @NotBlank(message = "{password.notBlank}")
-    @Size(min = 8, message = "{password.minSize}")
+    @Size(min = 8, max = 255, message = "{password.size}")
     private String password;
 
 

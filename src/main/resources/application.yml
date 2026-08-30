@@ -23,14 +23,14 @@ spring:
     show-sql: false
     generate-ddl: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     output:
  #     ansi:
  #       enabled: always
 
 rsa:
-  private-key: classpath:certs/private.pem
-  public-key: classpath:certs/public.pem
+  private-key: ${RSA_PRIVATE_KEY_PATH}
+  public-key: ${RSA_PUBLIC_KEY_PATH}
 
 server:
   error:

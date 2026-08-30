@@ -64,6 +64,22 @@
 | `HOST`                  | `dpg-xxx123-a`                                                                       | Internal hostname из карточки БД  |
 | `DB_PORT`               | `5432`                                                                               | Порт PostgreSQL                   |
 
+## Шаг 3.1. Secret Files (JWT-ключи)
+
+Для подписи JWT используется RSA-пара. Ключи в репозиторий не коммитим — храним в Render Secret Files.
+
+1. В Dashboard Web Service откройте **Environment** → **Secret Files**.
+2. Добавьте файл:
+   - **Filename:** `private.pem`
+   - **Contents:** содержимое приватного ключа (нового, сгенерированного через `openssl genrsa`)
+3. Добавьте файл:
+   - **Filename:** `public.pem`
+   - **Contents:** содержимое публичного ключа
+4. Render смонтирует их в `/etc/secrets/private.pem` и `/etc/secrets/public.pem`.
+5. Добавьте переменные окружения:
+   - `RSA_PRIVATE_KEY_PATH=file:/etc/secrets/private.pem`
+   - `RSA_PUBLIC_KEY_PATH=file:/etc/secrets/public.pem`
+
 ---
 
 ## Шаг 4. Деплой
