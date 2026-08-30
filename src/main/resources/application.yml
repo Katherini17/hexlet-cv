@@ -29,8 +29,8 @@ spring:
  #       enabled: always
 
 rsa:
-  private-key: classpath:certs/private.pem
-  public-key: classpath:certs/public.pem
+  private-key: ${RSA_PRIVATE_KEY_PATH}
+  public-key: ${RSA_PUBLIC_KEY_PATH}
 
 server:
   error:

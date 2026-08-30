@@ -31,6 +31,16 @@ public class EncodersConfig {
 
     private static final String INVALID_TOKEN = "invalid_token";
 
+    private static final String ERR_REFRESH_CANNOT_AUTHENTICATE = "Refresh token cannot authenticate requests";
+    private static final String ERR_EXPECTED_REFRESH = "Expected a refresh token";
+    private static final String ERR_MISSING_TOKEN_VERSION = "Missing tokenVersion claim";
+    private static final String ERR_MISSING_FAMILY_ID = "Missing familyId claim";
+    private static final String ERR_MALFORMED_FAMILY_ID = "Malformed familyId claim";
+    private static final String ERR_SESSION_REVOKED = "Session revoked";
+    private static final String ERR_MISSING_JTI_OR_FAMILY = "Missing jti or familyId";
+    private static final String ERR_TOKEN_REVOKED = "Token revoked";
+    private static final String ERR_WRONG_AUDIENCE = "Wrong audience";
+
     private final RsaKeyProperties rsaKeys;
     private final JwtProperties jwtProperties;
     private final UserRepository userRepository;
@@ -75,24 +85,24 @@ public class EncodersConfig {
         return jwt -> {
             Long tokenVersion = jwt.getClaim(JWTUtils.CLAIM_TOKEN_VERSION);
             if (tokenVersion == null) {
-                return invalid("Missing tokenVersion claim");
+                return invalid(ERR_MISSING_TOKEN_VERSION);
             }
             String rawFamilyId = jwt.getClaimAsString(JWTUtils.CLAIM_FAMILY_ID);
             if (rawFamilyId == null) {
                 // Фаза 1: токен выпущен до релиза — проверяем только tokenVersion.
                 return jwtProperties.isEnforceSessionClaims()
-                        ? invalid("Missing familyId claim")
+                        ? invalid(ERR_MISSING_FAMILY_ID)
                         : tokenVersionValid().validate(jwt);
             }
             UUID familyId;
             try {
                 familyId = UUID.fromString(rawFamilyId);
             } catch (IllegalArgumentException e) {
-                return invalid("Malformed familyId claim");
+                return invalid(ERR_MALFORMED_FAMILY_ID);
             }
             return userRepository.isSessionValid(jwt.getSubject(), tokenVersion, familyId)
                     ? OAuth2TokenValidatorResult.success()
-                    : invalid("Session revoked");
+                    : invalid(ERR_SESSION_REVOKED);
         };
     }
 
@@ -107,7 +117,7 @@ public class EncodersConfig {
             if (present || !jwtProperties.isEnforceSessionClaims()) {
                 return OAuth2TokenValidatorResult.success();
             }
-            return invalid("Missing jti or familyId");
+            return invalid(ERR_MISSING_JTI_OR_FAMILY);
         };
     }
 
@@ -116,31 +126,27 @@ public class EncodersConfig {
     }
 
     private OAuth2TokenValidator<Jwt> mustNotBeRefresh() {
-        return jwt -> "refresh".equals(jwt.getClaimAsString("type"))
-                ? OAuth2TokenValidatorResult.failure(
-                new OAuth2Error(INVALID_TOKEN, "Refresh token cannot authenticate requests", null))
+        return jwt -> JWTUtils.TYPE_REFRESH.equals(jwt.getClaimAsString(JWTUtils.CLAIM_TYPE))
+                ? invalid(ERR_REFRESH_CANNOT_AUTHENTICATE)
                 : OAuth2TokenValidatorResult.success();
     }
 
     private OAuth2TokenValidator<Jwt> mustBeRefresh() {
-        return jwt -> "refresh".equals(jwt.getClaimAsString("type"))
+        return jwt -> JWTUtils.TYPE_REFRESH.equals(jwt.getClaimAsString(JWTUtils.CLAIM_TYPE))
                 ? OAuth2TokenValidatorResult.success()
-                : OAuth2TokenValidatorResult.failure(
-                new OAuth2Error(INVALID_TOKEN, "Expected a refresh token", null));
+                : invalid(ERR_EXPECTED_REFRESH);
     }
 
     private OAuth2TokenValidator<Jwt> tokenVersionValid() {
         return jwt -> {
-            Long claimVersion = jwt.getClaim("tokenVersion");
+            Long claimVersion = jwt.getClaim(JWTUtils.CLAIM_TOKEN_VERSION);
             if (claimVersion == null) {
-                return OAuth2TokenValidatorResult.failure(
-                        new OAuth2Error(INVALID_TOKEN, "Missing tokenVersion claim", null));
+                return invalid(ERR_MISSING_TOKEN_VERSION);
             }
             return userRepository.findByEmail(jwt.getSubject())
                     .filter(user -> user.getTokenVersion() == claimVersion)
                     .map(user -> OAuth2TokenValidatorResult.success())
-                    .orElseGet(() -> OAuth2TokenValidatorResult.failure(
-                            new OAuth2Error(INVALID_TOKEN, "Token revoked", null)));
+                    .orElseGet(() -> invalid(ERR_TOKEN_REVOKED));
         };
     }
 
@@ -151,6 +157,6 @@ public class EncodersConfig {
     private OAuth2TokenValidator<Jwt> audienceValid() {
         return jwt -> jwt.getAudience().contains(jwtProperties.getAudience())
                 ? OAuth2TokenValidatorResult.success()
-                : OAuth2TokenValidatorResult.failure(new OAuth2Error(INVALID_TOKEN, "Wrong audience", null));
+                : invalid(ERR_WRONG_AUDIENCE);
     }
 }
