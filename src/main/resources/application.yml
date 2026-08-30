@@ -39,6 +39,16 @@ server:
     include-exception: false
 
 app:
+  audit:
+    # Читается напрямую logback-spring.xml, аппендер поднимается только в профиле prod
+    file:
+      path: logs/audit.log
+    alerts:
+      enabled: true
+      window: 5m
+      failure-threshold: 10
+      max-tracked-keys: 10000
+
   security:
     cookie:
       access:
@@ -59,3 +69,7 @@ app:
       enforce-session-claims: false             # → true через 30 дней после релиза, см. раздел 5
       refresh-race-grace-seconds: 0             # >0 — не казнить семейство при гонке, см. 3.5
       cleanup-cron: "0 17 3 * * *"
+
+logging:
+  level:
+    io.hexlet.cv.audit: info

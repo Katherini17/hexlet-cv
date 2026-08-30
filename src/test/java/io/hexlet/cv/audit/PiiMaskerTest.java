@@ -1,0 +1,91 @@
+package io.hexlet.cv.audit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+class PiiMaskerTest {
+
+    private static final String MASK = "***";
+
+    static Stream<Arguments> maskedAddresses() {
+        return Stream.of(
+                Arguments.of("обычный адрес", "ivan.petrov@example.com", "iv***@example.com"),
+                Arguments.of("локальная часть из 1 символа", "a@example.com", "***@example.com"),
+                Arguments.of("локальная часть из 2 символов", "ab@example.com", "a***@example.com"),
+                Arguments.of("плюс-адресация", "user+tag@example.com", "us***@example.com"),
+                Arguments.of("пробелы по краям", "  user@example.com  ", "us***@example.com"),
+                Arguments.of("кириллица", "остап@рога-и-копыта.рф", "ос***@рога-и-копыта.рф"),
+                Arguments.of("умлаут в NFC", "schön@beispiel.de", "sc***@beispiel.de"),
+                Arguments.of("умлаут в NFD", "scho\u0308n@beispiel.de", "sc***@beispiel.de"),
+                Arguments.of("эмодзи", "😀user@mail.ru", "😀u***@mail.ru")
+        );
+    }
+
+    static Stream<Arguments> unsafeAddresses() {
+        return Stream.of(
+                Arguments.of("строка без @", "admin"),
+                Arguments.of("перевод строки - подделка строк лога", "us\ner@example.com"),
+                Arguments.of("табуляция", "us\ter@example.com"),
+                Arguments.of("разделитель строк U+2028", "us\u2028er@example.com"),
+                Arguments.of("обычный пробел внутри", "user name@example.com"),
+                Arguments.of("неразрывный пробел U+00A0", "user\u00A0name@example.com"),
+                Arguments.of("идеографический пробел U+3000", "user\u3000name@example.com"),
+                Arguments.of("bidi-override U+202E", "user\u202Eexample@mail.ru"),
+                Arguments.of("zero-width space U+200B", "user\u200Bname@example.com"),
+                Arguments.of("zero-width joiner U+200D", "user\u200Dname@example.com"),
+                Arguments.of("одиночный суррогат", "user\uD83Dname@example.com"),
+                Arguments.of("private use U+E000", "user\uE000name@example.com"),
+                Arguments.of("два символа @", "user@@example.com"),
+                Arguments.of("@ первым символом", "@example.com"),
+                Arguments.of("@ последним символом", "user@"),
+                Arguments.of("jwt вместо субъекта", "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ4In0.c2ln")
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("maskedAddresses")
+    void shouldMaskPartiallyKeepingNationalCharacters(String name, String input, String expected) {
+        assertThat(PiiMasker.maskEmail(input)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("maskedAddresses")
+    void shouldNeverRevealWholeLocalPart(String name, String input) {
+        var trimmed = input.trim();
+        var localPart = trimmed.substring(0, trimmed.indexOf('@'));
+
+        var masked = PiiMasker.maskEmail(input);
+        var maskedLocalPart = masked.substring(0, masked.indexOf('@'));
+
+        assertThat(maskedLocalPart).doesNotContain(localPart);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("unsafeAddresses")
+    void shouldMaskCompletelyWhenStringIsUnsafeOrMalformed(String name, String input) {
+        assertThat(PiiMasker.maskEmail(input)).isEqualTo(MASK);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   ", "\t\n"})
+    void shouldMaskCompletelyWhenInputIsEmpty(String input) {
+        assertThat(PiiMasker.maskEmail(input)).isEqualTo(MASK);
+    }
+
+    /**
+     * Пустой вход и отсутствующий субъект - разные случаи. Первый маскируется как мусор,
+     * второй сюда не доходит вовсе: плейсхолдер подставляет AuditLogger, иначе маскировщик
+     * знал бы формат журнала.
+     */
+    @Test
+    void shouldRejectNullBecauseAbsentSubjectIsHandledByLogger() {
+        assertThatNullPointerException().isThrownBy(() -> PiiMasker.maskEmail(null));
+    }
+}

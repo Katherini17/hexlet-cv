@@ -21,7 +21,7 @@ public class RegistrationService {
     public RegistrationResponseDTO registration(RegistrationRequestDTO inputDTO) {
 
         userRepository.findByEmail(inputDTO.getEmail()).ifPresent(user -> {
-            throw new UserAlreadyExistsException("Пользователь с email " + user.getEmail() + " уже существует");
+            throw new UserAlreadyExistsException("Пользователь с таким email уже существует");
         });
 
         var newUserData = registrationMapper.map(inputDTO);

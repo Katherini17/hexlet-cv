@@ -2,7 +2,11 @@
 package io.hexlet.cv.controller;
 
 import io.github.inertia4j.spring.Inertia;
+import io.hexlet.cv.audit.AuditEventType;
+import io.hexlet.cv.audit.AuditLogger;
+import io.hexlet.cv.audit.AuditReason;
 import io.hexlet.cv.dto.user.auth.RegistrationRequestDTO;
+import io.hexlet.cv.handler.exception.UserAlreadyExistsException;
 import io.hexlet.cv.security.TokenCookieService;
 import io.hexlet.cv.security.TokenService;
 import io.hexlet.cv.service.FlashPropsService;
@@ -15,6 +19,7 @@ import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +37,7 @@ public class RegistrationController {
     private final FlashPropsService flashPropsService;
 
     private final TokenCookieService tokenCookieService;
+    private final AuditLogger auditLogger;
 
     @GetMapping("/users/sign_up")
     public ResponseEntity<?> signUpForm(HttpServletRequest request) {
@@ -43,15 +49,26 @@ public class RegistrationController {
 
     @PostMapping(path = "/users")
     public Object registration(@Valid @RequestBody RegistrationRequestDTO inputDTO,
+                               HttpServletRequest request,
                                HttpServletResponse response,
                                HttpSession session) {
 
-        userService.registration(inputDTO);
-
-        var tokens = tokenService.authenticateAndGenerate(
-                inputDTO.getEmail(),
-                inputDTO.getPassword()
-        );
+        TokenService.Tokens tokens;
+        try {
+            userService.registration(inputDTO);
+            tokens = tokenService.authenticateAndGenerate(
+                    inputDTO.getEmail(),
+                    inputDTO.getPassword()
+            );
+        } catch (UserAlreadyExistsException e) {
+            auditLogger.logFailure(AuditEventType.REGISTRATION, inputDTO.getEmail(),
+                    AuditReason.EMAIL_TAKEN, request);
+            throw e;
+        } catch (AuthenticationException e) {
+            auditLogger.logFailure(AuditEventType.REGISTRATION, inputDTO.getEmail(),
+                    AuditReason.AUTHENTICATION_FAILED, request);
+            throw e;
+        }
 
         var access = tokenCookieService.buildAccessCookie(tokens.access());
         var refresh = tokenCookieService.buildRefreshCookie(tokens.refresh());
@@ -60,6 +77,7 @@ public class RegistrationController {
         response.addHeader(HttpHeaders.SET_COOKIE, refresh.toString());
 
         session.setAttribute("flash", Map.of("success", true));
+        auditLogger.logSuccess(AuditEventType.REGISTRATION, inputDTO.getEmail(), request);
 
         return inertia.redirect("/dashboard");
 

@@ -3,6 +3,10 @@ rsa:
   public-key: classpath:certs/public.pem
 
 app:
+  audit:
+    alerts:
+      enabled: false
+
   security:
     cookie:
       access:

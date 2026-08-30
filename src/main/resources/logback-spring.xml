@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  События аудита дублируются в отдельный файл долгого хранения: у него другой срок жизни
+  и другой круг читателей, чем у прикладного лога. Именно дублируются, а не переносятся -
+  см. комментарий про additivity ниже. Настройка действует только в prod: в dev и test
+  поведение логирования остаётся дефолтным, чтобы конфигурация не влияла на прогон тестов.
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <springProfile name="prod">
+        <!-- Путь берётся из app.audit.*, а не из переменной окружения: остальные настройки
+             аудита живут там же и переопределяются по профилю -->
+        <springProperty name="AUDIT_LOG_PATH" source="app.audit.file.path" defaultValue="logs/audit.log"/>
+
+        <!-- Заявленный срок хранения держится, только если каталог с файлом вынесен на том:
+             в образе тома нет, и без него файл живёт не дольше самого контейнера.
+             Монтирование - забота деплоя, приложение его обеспечить не может -->
+        <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${AUDIT_LOG_PATH}</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${AUDIT_LOG_PATH}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+                <maxHistory>365</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder>
+                <!-- Без имени потока и логгера: префиксы [AUDIT] и [AUDIT-ALERT] уже самодостаточны -->
+                <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- additivity намеренно оставлен включённым: приложение пишет в stdout, и только оттуда
+             логи забирает сборщик - отключение увело бы аудит в файл, который без тома исчезает
+             вместе с контейнером. Разделение по сроку хранения и доступу делается на стороне
+             сбора, по префиксу [AUDIT], а не отключением аппендера здесь -->
+        <logger name="io.hexlet.cv.audit" level="INFO">
+            <appender-ref ref="AUDIT_FILE"/>
+        </logger>
+    </springProfile>
+</configuration>
