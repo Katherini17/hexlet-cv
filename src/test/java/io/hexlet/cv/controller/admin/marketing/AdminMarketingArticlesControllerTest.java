@@ -1,13 +1,5 @@
 package io.hexlet.cv.controller.admin.marketing;
 
-import io.hexlet.cv.controller.admin.marketing.support.AdminMarketingControllerTestSupport;
-import io.hexlet.cv.dto.marketing.ArticleCreateDto;
-import io.hexlet.cv.dto.marketing.ArticleUpdateDto;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.openapitools.jackson.nullable.JsonNullable;
-import org.springframework.http.MediaType;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,6 +10,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import io.hexlet.cv.controller.admin.marketing.support.AdminMarketingControllerTestSupport;
+import io.hexlet.cv.dto.marketing.ArticleCreateDto;
+import io.hexlet.cv.dto.marketing.ArticleUpdateDto;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.http.MediaType;
 
 /**
  * Создание и обновление статей через {@code POST/PUT /admin/marketing/articles}:
@@ -57,7 +57,7 @@ public class AdminMarketingArticlesControllerTest extends AdminMarketingControll
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.title").exists());
     }
 
@@ -72,7 +72,7 @@ public class AdminMarketingArticlesControllerTest extends AdminMarketingControll
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.content").exists());
     }
 

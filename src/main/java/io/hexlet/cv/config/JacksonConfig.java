@@ -1,6 +1,7 @@
 package io.hexlet.cv.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -46,6 +47,7 @@ public class JacksonConfig {
         mapper.registerModule(javaTimeModule);
 
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
         return mapper;
     }
@@ -78,6 +80,7 @@ public class JacksonConfig {
 
         return builder.serializationInclusion(JsonInclude.Include.NON_NULL)
                 .modules(new JsonNullableModule(), configuredModule)
-                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .featuresToEnable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 }

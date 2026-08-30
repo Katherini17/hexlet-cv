@@ -22,17 +22,20 @@ public class RegistrationRequestDTO {
     @EmailNotWithSingleCharTld
     @NotInDisposableEmailDomains
     @EmailDomainViaDnsApi
+    @Size(max = 255, message = "{email.maxSize}")
     private String email;
 
     @NotBlank(message = "{password.notBlank}")
-    @Size(min = 8, message = "{password.minSize}")
+    @Size(min = 8, max = 255, message = "{password.size}")
     @NotInTop10K
     private String password;
 
     @NotBlank(message = "{user.firstName.notBlank}")
+    @Size(max = 255, message = "{user.firstName.maxSize}")
     private String firstName;
 
     @NotBlank(message = "{user.lastName.notBlank}")
+    @Size(max = 255, message = "{user.lastName.maxSize}")
     private String lastName;
 
     @NotNull(message = "{user.terms.required}")

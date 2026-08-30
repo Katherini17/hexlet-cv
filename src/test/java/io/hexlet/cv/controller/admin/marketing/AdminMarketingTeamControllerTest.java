@@ -1,15 +1,5 @@
 package io.hexlet.cv.controller.admin.marketing;
 
-import io.hexlet.cv.controller.admin.marketing.support.AdminMarketingControllerTestSupport;
-import io.hexlet.cv.dto.marketing.TeamCreateDto;
-import io.hexlet.cv.dto.marketing.TeamUpdateDto;
-import io.hexlet.cv.model.enums.TeamMemberType;
-import io.hexlet.cv.model.enums.TeamPosition;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.openapitools.jackson.nullable.JsonNullable;
-import org.springframework.http.MediaType;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,6 +10,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import io.hexlet.cv.controller.admin.marketing.support.AdminMarketingControllerTestSupport;
+import io.hexlet.cv.dto.marketing.TeamCreateDto;
+import io.hexlet.cv.dto.marketing.TeamUpdateDto;
+import io.hexlet.cv.model.enums.TeamMemberType;
+import io.hexlet.cv.model.enums.TeamPosition;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.http.MediaType;
 
 /**
  * Создание и обновление участников команды через {@code POST/PUT /admin/marketing/team}:
@@ -62,7 +62,7 @@ public class AdminMarketingTeamControllerTest extends AdminMarketingControllerTe
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.firstName").exists());
     }
 
@@ -78,7 +78,7 @@ public class AdminMarketingTeamControllerTest extends AdminMarketingControllerTe
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.position").exists());
     }
 
@@ -94,7 +94,7 @@ public class AdminMarketingTeamControllerTest extends AdminMarketingControllerTe
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper().writeValueAsString(dto))
                         .with(user(ADMIN).roles(ROLE_ADMIN)))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.memberType").exists());
     }
 
