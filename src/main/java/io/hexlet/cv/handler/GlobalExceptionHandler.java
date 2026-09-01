@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Slf4j
@@ -100,6 +101,15 @@ public class GlobalExceptionHandler {
                                                   RedirectAttributes redirectAttributes) {
 
         Map<String, String> errors = Map.of("error", ex.getMessage());
+        return commonHandle(errors, request, redirectAttributes, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public Object handleNoResourceFound(NoResourceFoundException ex,
+                                        HttpServletRequest request,
+                                        RedirectAttributes redirectAttributes) {
+
+        Map<String, String> errors = Map.of("error", "Resource not found");
         return commonHandle(errors, request, redirectAttributes, HttpStatus.NOT_FOUND);
     }
 
