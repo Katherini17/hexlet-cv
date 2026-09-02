@@ -126,7 +126,13 @@ java {
 //     }
 // }
 
+tasks.register<Exec>("installTypeSpecDependencies") {
+    workingDir("api")
+    commandLine("npm", "ci")
+}
+
 tasks.register<Exec>("compileTypeSpec") {
+    dependsOn(tasks.named("installTypeSpecDependencies"))
     commandLine("npm", "--prefix", "api", "run", "compile")
 }
 
