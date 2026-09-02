@@ -126,8 +126,12 @@ java {
 //     }
 // }
 
+tasks.register<Exec>("compileTypeSpec") {
+    commandLine("npm", "--prefix", "api", "run", "compile")
+}
 
 tasks.openApiGenerate {
+    dependsOn(tasks.named("compileTypeSpec"))
     generatorName.set("spring")
     inputSpec.set(layout.buildDirectory.file("openapi/openapi.yaml").get().asFile.path)
     outputDir.set(layout.buildDirectory.dir("generated-sources/openapi"))
